@@ -1,0 +1,31 @@
+name: Spring Boot CI Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Dependencies
+        run: mvn install
+
+      - name: Run Unit Tests
+        run: mvn test
+
+      - name: Static Analysis
+        run: mvn sonar:sonar
+
+      - name: Build Application
+        run: mvn package
