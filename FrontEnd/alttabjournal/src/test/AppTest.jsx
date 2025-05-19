@@ -26,7 +26,7 @@ describe("App", () => {
     window.history.pushState({}, "Test page", "/");
   });
 
-  test('renders homepage components on route "/"', () => {
+  test("renders homepage components on route \"/\"", () => {
     window.history.pushState({}, "Home Page", "/");
     render(<App />);
     expect(screen.getByTestId("header")).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe("App", () => {
     expect(screen.queryByTestId("blog")).not.toBeInTheDocument();
   });
 
-  test('renders blog page components on route "/blog/:slug"', () => {
+  test("renders blog page components on route \"/blog/:slug\"", () => {
     window.history.pushState({}, "Blog Page", "/blog/test-slug");
     render(<App />);
     expect(screen.getByTestId("header")).toBeInTheDocument();

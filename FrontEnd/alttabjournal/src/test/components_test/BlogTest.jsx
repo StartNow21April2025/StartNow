@@ -1,6 +1,6 @@
 // BlogTest.jsx
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import Blog from "../../main/components/Blog";
 import { MemoryRouter } from "react-router-dom";
 
@@ -56,7 +56,7 @@ describe("Blog component", () => {
     await screen.findByText("Hello World");
 
     const blogContainer = container.querySelector(".blog-container");
-    expect(blogContainer).toHaveStyle(`background-image: url(/assets/images/background.jpg)`);
+    expect(blogContainer).toHaveStyle("background-image: url(/assets/images/background.jpg)");
   });
 
   it("renders 'Article not found' when article data is empty", async () => {
