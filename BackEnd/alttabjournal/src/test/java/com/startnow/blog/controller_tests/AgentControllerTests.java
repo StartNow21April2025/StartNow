@@ -1,4 +1,4 @@
-package com.startnow.blog.controllertests;
+package com.startnow.blog.controller_tests;
 
 import com.startnow.blog.controller.AgentController;
 import com.startnow.blog.model.tablemodel.Agent;

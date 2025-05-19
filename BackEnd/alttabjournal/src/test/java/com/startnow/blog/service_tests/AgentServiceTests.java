@@ -1,4 +1,4 @@
-package com.startnow.blog.servicetests;
+package com.startnow.blog.service_tests;
 
 import com.startnow.blog.model.tablemodel.Agent;
 import com.startnow.blog.service.AgentService;
