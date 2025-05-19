@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const ArticleCard = ({ title, description, slug }) => (
   <Link to={`/blog/${slug}`}>
