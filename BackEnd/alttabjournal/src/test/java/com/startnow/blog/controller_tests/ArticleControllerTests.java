@@ -1,4 +1,4 @@
-package com.startnow.blog.controllertests;
+package com.startnow.blog.controller_tests;
 
 import com.startnow.blog.controller.ArticleController;
 import com.startnow.blog.model.Article;

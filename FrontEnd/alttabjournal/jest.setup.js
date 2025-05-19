@@ -1,0 +1,8 @@
+/* eslint-env node */
+import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+
+if (typeof globalThis.TextEncoder === "undefined") {
+  globalThis.TextEncoder = TextEncoder;
+  globalThis.TextDecoder = TextDecoder;
+}

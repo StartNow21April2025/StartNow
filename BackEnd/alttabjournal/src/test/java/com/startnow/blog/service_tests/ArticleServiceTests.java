@@ -1,4 +1,4 @@
-package com.startnow.blog.servicetests;
+package com.startnow.blog.service_tests;
 
 import com.startnow.blog.model.Article;
 import com.startnow.blog.model.LatestArticle;

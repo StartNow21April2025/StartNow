@@ -1,9 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import FeaturedPost from './components/FeaturedPost';
-import LatestArticles from './components/LatestArticles';
-import Footer from './components/Footer';
-import Blog from './components/Blog';  // New Blog Component
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import FeaturedPost from "./components/FeaturedPost";
+import LatestArticles from "./components/LatestArticles";
+import Footer from "./components/Footer";
+import Blog from "./components/Blog";  // New Blog Component
 
 const App = () => (
   <Router>

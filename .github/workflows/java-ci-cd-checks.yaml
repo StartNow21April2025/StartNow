@@ -1,0 +1,81 @@
+name: Combined CI Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '44 10 * * 4'
+
+jobs:
+  codeql-analysis:
+    name: Analyze CodeQL (${{ matrix.language }})
+    runs-on: ${{ matrix.language == 'swift' && 'macos-latest' || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: none  # Use 'autobuild' or 'manual' if your Kotlin build requires it.
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # You can uncomment and adjust custom queries if needed:
+          # queries: security-extended,security-and-quality
+
+      # If a manual build mode is required, add your build commands here.
+      - if: matrix.build-mode == 'manual'
+        shell: bash
+        run: |
+          echo 'Manual build mode detected. Add your build commands below:'
+          echo '  make bootstrap'
+          echo '  make release'
+          exit 1
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  spring-boot-ci:
+    name: Spring Boot CI Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Dependencies
+        run: |
+          cd BackEnd/alttabjournal
+          mvn install
+
+      - name: Run Unit Tests
+        run: |
+          cd BackEnd/alttabjournal
+          mvn test
+
+      - name: Build Application
+        run: |
+          cd BackEnd/alttabjournal
+          mvn package
