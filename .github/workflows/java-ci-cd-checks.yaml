@@ -19,13 +19,21 @@ jobs:
           java-version: '21'
 
       - name: Install Dependencies
-        run: mvn install
+        run: |
+          cd BackEnd/alttabjournal
+          mvn install
 
       - name: Run Unit Tests
-        run: mvn test
+        run: |
+          cd BackEnd/alttabjournal
+          mvn test
 
       - name: Static Analysis
-        run: mvn sonar:sonar
+        run: |
+          cd BackEnd/alttabjournal
+          mvn sonar:sonar
 
       - name: Build Application
-        run: mvn package
+        run: |
+          cd BackEnd/alttabjournal
+          mvn package
