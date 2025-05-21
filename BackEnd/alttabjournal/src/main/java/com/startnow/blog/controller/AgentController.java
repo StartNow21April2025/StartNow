@@ -8,9 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for managing Agent entities.
- */
+/** REST controller for managing Agent entities. */
 @Validated
 @RestController
 @RequestMapping("/api/agents")
@@ -36,6 +34,9 @@ public class AgentController {
     @PostMapping
     @Operation(summary = "Create an Agent in table")
     public ResponseEntity<Void> create(@Valid @RequestBody Agent agent) {
+        if (agent == null) {
+            return ResponseEntity.badRequest().build();
+        }
         agentService.createAgent(agent.getAgentId(), agent.getAgentName());
         return ResponseEntity.ok().build();
     }
@@ -49,8 +50,7 @@ public class AgentController {
     @GetMapping("/{agentId}")
     @Operation(summary = "Read an Agent in table")
     public ResponseEntity<Agent> read(@PathVariable int agentId) {
-        return agentService.getAgent(agentId)
-                .map(ResponseEntity::ok)
+        return agentService.getAgent(agentId).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -58,7 +58,7 @@ public class AgentController {
      * Updates an existing Agent.
      *
      * @param agentId the ID of the Agent to update
-     * @param agent   the Agent data to update
+     * @param agent the Agent data to update
      * @return HTTP 200 OK if updated successfully
      */
     @PutMapping("/{agentId}")

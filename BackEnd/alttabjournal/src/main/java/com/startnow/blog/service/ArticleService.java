@@ -2,36 +2,42 @@ package com.startnow.blog.service;
 
 import com.startnow.blog.model.Article;
 import com.startnow.blog.model.LatestArticle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @Service
 public class ArticleService {
 
-    private final DynamoDbClient dynamoDbClient;
-    private final String articlesTableName = "Articles";
-    private final String articlesContentTableName = "ArticleContent";
+    private static final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 
-    public ArticleService(DynamoDbClient dynamoDbClient) {
+    private final DynamoDbClient dynamoDbClient;
+    private final String articlesTableName;
+    private final String articlesContentTableName;
+
+    public ArticleService(DynamoDbClient dynamoDbClient,
+            @Value("${dynamodb.articlesTableName:Articles}") String articlesTableName,
+            @Value("${dynamodb.articlesContentTableName:ArticleContent}") String articlesContentTableName) {
         this.dynamoDbClient = dynamoDbClient;
+        this.articlesTableName = articlesTableName;
+        this.articlesContentTableName = articlesContentTableName;
     }
 
-    // ✅ Get all articles
+    /** Retrieves all articles with summary information. */
     public List<LatestArticle> getAllArticles() {
-        ScanRequest scanRequest = ScanRequest.builder()
-                .tableName(articlesTableName)
-                .projectionExpression("title, description, slug, fullContent") // Retrieve only required attributes
-                .build();
+        ScanRequest scanRequest = ScanRequest.builder().tableName(articlesTableName)
+                .projectionExpression("title, description, slug").build();
 
         ScanResponse response = dynamoDbClient.scan(scanRequest);
-        System.out.println("DynamoDB Response: " + response); // Debugging
+        logger.info("Fetched {} articles from table {}", response.count(), articlesTableName);
 
         List<LatestArticle> articles = new ArrayList<>();
         for (Map<String, AttributeValue> item : response.items()) {
@@ -43,28 +49,24 @@ public class ArticleService {
         return articles;
     }
 
-    // ✅ Fetch an article by slug
+    /** Retrieves a full article by its slug. */
     public Article getArticleBySlug(String slug) {
-        ScanRequest scanRequest = ScanRequest.builder()
-                .tableName(articlesContentTableName)
-                .filterExpression("#slug = :slug") // Corrected filter expression format
-                .expressionAttributeNames(Map.of("#slug", "slug")) // Define attribute alias
+        ScanRequest scanRequest = ScanRequest.builder().tableName(articlesContentTableName)
+                .filterExpression("#slug = :slug").expressionAttributeNames(Map.of("#slug", "slug"))
                 .expressionAttributeValues(Map.of(":slug", AttributeValue.fromS(slug)))
-                .projectionExpression("slug, fullContent") // Retrieve only necessary fields
-                .build();
+                .projectionExpression("slug, fullContent").build();
 
         ScanResponse response = dynamoDbClient.scan(scanRequest);
-        System.out.println("Fetching article by slug: " + slug + "\nResponse: " + response); // Debugging
+        logger.info("Fetched {} articles with slug '{}' from table {}", response.count(), slug,
+                articlesContentTableName);
 
         if (response.items().isEmpty()) {
-            System.out.println("Article not found for slug: " + slug);
+            logger.warn("Article not found for slug: {}", slug);
             return null;
         }
 
         Map<String, AttributeValue> item = response.items().get(0);
-        return new Article(
-                item.getOrDefault("slug", AttributeValue.fromS("")).s(),
-                item.getOrDefault("fullContent", AttributeValue.fromS("")).s() // Fetch full blog content
-        );
+        return new Article(item.getOrDefault("slug", AttributeValue.fromS("")).s(),
+                item.getOrDefault("fullContent", AttributeValue.fromS("")).s());
     }
 }

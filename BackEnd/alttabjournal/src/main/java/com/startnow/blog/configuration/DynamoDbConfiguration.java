@@ -9,8 +9,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 public class DynamoDbConfiguration {
     @Bean
     public DynamoDbClient dynamoDbClient() {
-        return DynamoDbClient.builder()
-                .region(Region.AP_SOUTH_1) // Mumbai or your preferred region
+        return DynamoDbClient.builder().region(Region.AP_SOUTH_1) // Mumbai or your preferred region
                 .build();
     }
 }

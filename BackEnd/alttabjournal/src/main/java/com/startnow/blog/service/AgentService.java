@@ -2,14 +2,13 @@ package com.startnow.blog.service;
 
 import com.startnow.blog.exception.AgentNotFoundException;
 import com.startnow.blog.model.tablemodel.Agent;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -30,10 +29,7 @@ public class AgentService {
         item.put("agentId", AttributeValue.fromN(String.valueOf(agentId)));
         item.put("agentName", AttributeValue.fromS(agentName));
 
-        PutItemRequest request = PutItemRequest.builder()
-                .tableName(tableName)
-                .item(item)
-                .build();
+        PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(item).build();
 
         try {
             dynamoDbClient.putItem(request);
@@ -45,10 +41,8 @@ public class AgentService {
     }
 
     public Optional<Agent> getAgent(int agentId) {
-        GetItemRequest request = GetItemRequest.builder()
-                .tableName(tableName)
-                .key(Map.of("agentId", AttributeValue.fromN(String.valueOf(agentId))))
-                .build();
+        GetItemRequest request = GetItemRequest.builder().tableName(tableName)
+                .key(Map.of("agentId", AttributeValue.fromN(String.valueOf(agentId)))).build();
 
         try {
             Map<String, AttributeValue> item = dynamoDbClient.getItem(request).item();
@@ -73,11 +67,8 @@ public class AgentService {
         item.put("agentId", AttributeValue.fromN(String.valueOf(agentId)));
         item.put("agentName", AttributeValue.fromS(agentName));
 
-        PutItemRequest request = PutItemRequest.builder()
-                .tableName(tableName)
-                .item(item)
-                .conditionExpression("attribute_exists(agentId)")
-                .build();
+        PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(item)
+                .conditionExpression("attribute_exists(agentId)").build();
 
         try {
             dynamoDbClient.putItem(request);
@@ -92,10 +83,8 @@ public class AgentService {
     }
 
     public void deleteAgent(int agentId) {
-        DeleteItemRequest request = DeleteItemRequest.builder()
-                .tableName(tableName)
-                .key(Map.of("agentId", AttributeValue.fromN(String.valueOf(agentId))))
-                .build();
+        DeleteItemRequest request = DeleteItemRequest.builder().tableName(tableName)
+                .key(Map.of("agentId", AttributeValue.fromN(String.valueOf(agentId)))).build();
 
         try {
             dynamoDbClient.deleteItem(request);
