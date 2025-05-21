@@ -1,15 +1,15 @@
 package com.startnow.blog.model.tablemodel;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import software.amazon.awssdk.annotations.NotNull;
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Agent {
-    public int agentId;
-    public String agentName;
+    @NotNull
+    private int agentId;
+    private String agentName;
 }

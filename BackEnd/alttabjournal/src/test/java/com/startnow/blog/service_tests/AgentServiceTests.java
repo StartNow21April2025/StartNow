@@ -1,5 +1,6 @@
 package com.startnow.blog.service_tests;
 
+import com.startnow.blog.exception.AgentNotFoundException;
 import com.startnow.blog.model.tablemodel.Agent;
 import com.startnow.blog.service.AgentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -48,8 +50,9 @@ class AgentServiceTests {
 
         when(dynamoDbClient.getItem(any(GetItemRequest.class))).thenReturn(response);
 
-        Agent agent = agentService.getAgent(1);
-        assertNotNull(agent);
+        Optional<Agent> agentOpt = agentService.getAgent(1);
+        assertTrue(agentOpt.isPresent());
+        Agent agent = agentOpt.get();
         assertEquals(1, agent.getAgentId());
         assertEquals("Jett", agent.getAgentName());
     }
@@ -58,10 +61,8 @@ class AgentServiceTests {
     void testGetAgentNotFound() {
         when(dynamoDbClient.getItem(any(GetItemRequest.class))).thenReturn(GetItemResponse.builder().build());
 
-        Agent agent = agentService.getAgent(999);
-        assertNotNull(agent);
-        assertEquals(0, agent.getAgentId());
-        assertNull(agent.getAgentName());
+        Optional<Agent> agentOpt = agentService.getAgent(999);
+        assertFalse(agentOpt.isPresent());
     }
 
     @Test
@@ -79,9 +80,9 @@ class AgentServiceTests {
         doThrow(ConditionalCheckFailedException.builder().build())
                 .when(dynamoDbClient).putItem(any(PutItemRequest.class));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> agentService.updateAgent(999, "NonExistent"));
+        Exception exception = assertThrows(AgentNotFoundException.class, () -> agentService.updateAgent(999, "NonExistent"));
 
-        assertEquals("Cannot update: Agent with ID 999 does not exist.", exception.getMessage());
+        assertEquals("Agent with ID 999 does not exist.", exception.getMessage());
     }
 
     @Test

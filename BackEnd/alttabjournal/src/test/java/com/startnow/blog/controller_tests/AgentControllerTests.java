@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -41,7 +43,7 @@ class AgentControllerTests {
     @Test
     void testGetAgent() {
         Agent mockAgent = new Agent(1, "Jett");
-        when(agentService.getAgent(1)).thenReturn(mockAgent);
+        when(agentService.getAgent(1)).thenReturn(Optional.of(mockAgent));
 
         ResponseEntity<Agent> response = agentController.read(1);
 
@@ -52,11 +54,11 @@ class AgentControllerTests {
 
     @Test
     void testGetAgentNotFound() {
-        when(agentService.getAgent(999)).thenReturn(null);
+        when(agentService.getAgent(999)).thenReturn(Optional.empty());
 
         ResponseEntity<Agent> response = agentController.read(999);
 
-        assertEquals(200, response.getStatusCodeValue()); // Consider using 404 in service for missing agents
+        assertEquals(404, response.getStatusCodeValue());
         assertNull(response.getBody());
     }
 
@@ -66,7 +68,7 @@ class AgentControllerTests {
 
         doNothing().when(agentService).updateAgent(updatedAgent.getAgentId(), updatedAgent.getAgentName());
 
-        ResponseEntity<Void> response = agentController.update(updatedAgent);
+        ResponseEntity<Void> response = agentController.update(1, updatedAgent);
 
         assertEquals(200, response.getStatusCodeValue());
         verify(agentService, times(1)).updateAgent(updatedAgent.getAgentId(), updatedAgent.getAgentName());
