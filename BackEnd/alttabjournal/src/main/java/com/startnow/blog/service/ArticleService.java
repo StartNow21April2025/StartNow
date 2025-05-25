@@ -1,72 +1,72 @@
 package com.startnow.blog.service;
 
+import com.startnow.blog.entity.ArticleContentEntity;
+import com.startnow.blog.entity.ArticleEntity;
+import com.startnow.blog.exception.ServiceException;
 import com.startnow.blog.model.Article;
-import com.startnow.blog.model.LatestArticle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.startnow.blog.model.ArticleContent;
+import com.startnow.blog.repository.IArticleContentRepository;
+import com.startnow.blog.repository.IArticleRepository;
+import com.startnow.blog.util.ArticleUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
-import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class ArticleService {
+@Slf4j
+@RequiredArgsConstructor
+public class ArticleService implements ArticleServiceInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 
-    private final DynamoDbClient dynamoDbClient;
-    private final String articlesTableName;
-    private final String articlesContentTableName;
+    private final IArticleRepository articleRepository;
+    private final IArticleContentRepository articleContentRepository;
 
-    public ArticleService(DynamoDbClient dynamoDbClient,
-            @Value("${dynamodb.articlesTableName:Articles}") String articlesTableName,
-            @Value("${dynamodb.articlesContentTableName:ArticleContent}") String articlesContentTableName) {
-        this.dynamoDbClient = dynamoDbClient;
-        this.articlesTableName = articlesTableName;
-        this.articlesContentTableName = articlesContentTableName;
+    /**
+     * Retrieves all articles with summary information.
+     */
+    @Override
+    public List<Article> getAllArticles() {
+        try {
+            List<ArticleEntity> articleEntityList = articleRepository.findAll();
+            if (articleEntityList.isEmpty()) {
+                logger.warn("Articles not found in the database.");
+                return new ArrayList<>();
+            }
+            logger.info("Fetched {} articles from table {}", articleEntityList.size(), "Articles");
+            return articleEntityList.stream().filter(Objects::nonNull)
+                    .map(ArticleUtil::convertToArticle).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching all Articles: {}", e.getMessage(), e);
+            throw new ServiceException("Failed to fetch Articles", e);
+        }
     }
 
-    /** Retrieves all articles with summary information. */
-    public List<LatestArticle> getAllArticles() {
-        ScanRequest scanRequest = ScanRequest.builder().tableName(articlesTableName)
-                .projectionExpression("title, description, slug").build();
-
-        ScanResponse response = dynamoDbClient.scan(scanRequest);
-        logger.info("Fetched {} articles from table {}", response.count(), articlesTableName);
-
-        List<LatestArticle> articles = new ArrayList<>();
-        for (Map<String, AttributeValue> item : response.items()) {
-            String title = item.getOrDefault("title", AttributeValue.fromS("")).s();
-            String description = item.getOrDefault("description", AttributeValue.fromS("")).s();
-            String slug = item.getOrDefault("slug", AttributeValue.fromS("")).s();
-            articles.add(new LatestArticle(title, description, slug));
+    /**
+     * Retrieves a full article by its slug.
+     */
+    @Override
+    public ArticleContent getArticleContentBySlug(String slug) {
+        try {
+            Optional<ArticleContentEntity> articleContentEntity =
+                    articleContentRepository.findById(slug);
+            if (articleContentEntity.isEmpty()) {
+                logger.warn("Article not found for slug: {}", slug);
+                return null;
+            }
+            logger.info("Fetched article for slug {} from table {}", slug, "ArticleContent");
+            return ArticleUtil.convertToArticleContent(articleContentEntity.get());
+        } catch (Exception e) {
+            log.error("Error fetching ArticleContent: {}", e.getMessage(), e);
+            throw new ServiceException("Failed to fetch Article", e);
         }
-        return articles;
-    }
-
-    /** Retrieves a full article by its slug. */
-    public Article getArticleBySlug(String slug) {
-        ScanRequest scanRequest = ScanRequest.builder().tableName(articlesContentTableName)
-                .filterExpression("#slug = :slug").expressionAttributeNames(Map.of("#slug", "slug"))
-                .expressionAttributeValues(Map.of(":slug", AttributeValue.fromS(slug)))
-                .projectionExpression("slug, fullContent").build();
-
-        ScanResponse response = dynamoDbClient.scan(scanRequest);
-        logger.info("Fetched {} articles with slug '{}' from table {}", response.count(), slug,
-                articlesContentTableName);
-
-        if (response.items().isEmpty()) {
-            logger.warn("Article not found for slug: {}", slug);
-            return null;
-        }
-
-        Map<String, AttributeValue> item = response.items().get(0);
-        return new Article(item.getOrDefault("slug", AttributeValue.fromS("")).s(),
-                item.getOrDefault("fullContent", AttributeValue.fromS("")).s());
     }
 }

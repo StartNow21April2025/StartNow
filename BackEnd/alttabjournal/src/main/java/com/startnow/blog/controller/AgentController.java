@@ -1,27 +1,32 @@
 package com.startnow.blog.controller;
 
-import com.startnow.blog.model.tablemodel.Agent;
-import com.startnow.blog.service.AgentService;
+import com.startnow.blog.model.Agent;
+import com.startnow.blog.service.AgentServiceInterface;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /** REST controller for managing Agent entities. */
 @Validated
 @RestController
 @RequestMapping("/api/agents")
+@Tag(name = "Agent Controller", description = "APIs for managing agents")
 public class AgentController {
 
-    private final AgentService agentService;
+    private final AgentServiceInterface agentService;
 
     /**
      * Constructs an AgentController with the given AgentService.
      *
-     * @param agentService the service to handle agent operations
+     * @param agentService the service to handle agentName operations
      */
-    public AgentController(AgentService agentService) {
+    public AgentController(AgentServiceInterface agentService) {
         this.agentService = agentService;
     }
 
@@ -33,12 +38,11 @@ public class AgentController {
      */
     @PostMapping
     @Operation(summary = "Create an Agent in table")
-    public ResponseEntity<Void> create(@Valid @RequestBody Agent agent) {
+    public ResponseEntity<Agent> create(@Valid @RequestBody Agent agent) {
         if (agent == null) {
             return ResponseEntity.badRequest().build();
         }
-        agentService.createAgent(agent.getAgentId(), agent.getAgentName());
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(agentService.createAgent(agent), HttpStatus.CREATED);
     }
 
     /**
@@ -49,9 +53,21 @@ public class AgentController {
      */
     @GetMapping("/{agentId}")
     @Operation(summary = "Read an Agent in table")
-    public ResponseEntity<Agent> read(@PathVariable int agentId) {
-        return agentService.getAgent(agentId).map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Agent> get(@PathVariable Integer agentId) {
+        return ResponseEntity.ok(agentService.getAgentById(agentId));
+
+    }
+
+    /**
+     * Retrieves all Agents.
+     *
+     * @return the List of Agents if found, or HTTP 404 if not found
+     */
+    @GetMapping("all")
+    @Operation(summary = "Get all Agent in table")
+    public ResponseEntity<List<Agent>> getAllAgents() {
+        return ResponseEntity.ok(agentService.getAllAgents());
+
     }
 
     /**
@@ -63,9 +79,9 @@ public class AgentController {
      */
     @PutMapping("/{agentId}")
     @Operation(summary = "Update an Agent in table")
-    public ResponseEntity<Void> update(@PathVariable int agentId, @Valid @RequestBody Agent agent) {
-        agentService.updateAgent(agentId, agent.getAgentName());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Agent> update(@PathVariable Integer agentId,
+            @Valid @RequestBody Agent agent) {
+        return ResponseEntity.ok(agentService.updateAgent(agentId, agent));
     }
 
     /**
@@ -76,8 +92,8 @@ public class AgentController {
      */
     @DeleteMapping("/{agentId}")
     @Operation(summary = "Delete an Agent in table")
-    public ResponseEntity<Void> delete(@PathVariable int agentId) {
+    public ResponseEntity<Void> delete(@PathVariable Integer agentId) {
         agentService.deleteAgent(agentId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

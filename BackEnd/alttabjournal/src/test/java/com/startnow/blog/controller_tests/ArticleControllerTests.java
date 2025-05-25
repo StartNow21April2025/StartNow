@@ -1,107 +1,116 @@
 package com.startnow.blog.controller_tests;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
 import com.startnow.blog.controller.ArticleController;
+import com.startnow.blog.exception_handler.GlobalExceptionHandler;
 import com.startnow.blog.model.Article;
-import com.startnow.blog.model.LatestArticle;
+import com.startnow.blog.model.ArticleContent;
 import com.startnow.blog.service.ArticleService;
-import java.util.List;
-import org.junit.jupiter.api.AfterEach;
+import com.startnow.blog.service.ArticleServiceInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@ExtendWith(MockitoExtension.class)
 class ArticleControllerTests {
 
+    private MockMvc mockMvc;
+
     @Mock
-    private ArticleService articleService;
+    private ArticleServiceInterface articleService;
 
     @InjectMocks
     private ArticleController articleController;
 
-    private AutoCloseable mocks;
-
     @BeforeEach
     void setUp() {
-        mocks = MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mocks != null) {
-            mocks.close();
-        }
+        mockMvc = MockMvcBuilders.standaloneSetup(articleController)
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
     }
 
     @Test
     @DisplayName("Should return list of articles when articles exist")
-    void getArticles_ReturnsList() {
-        List<LatestArticle> mockArticles =
-                List.of(new LatestArticle("Title 1", "Description 1", "slug-1"),
-                        new LatestArticle("Title 2", "Description 2", "slug-2"));
+    void getArticles_ReturnsList() throws Exception {
+        List<Article> mockArticles = List.of(
+                Article.builder().title("Title 1").description("Description 1").slug("slug-1")
+                        .build(),
+                Article.builder().title("Title 2").description("Description 2").slug("slug-2")
+                        .build());
+
         when(articleService.getAllArticles()).thenReturn(mockArticles);
 
-        List<LatestArticle> articles = articleController.getArticles();
-
-        assertAll(() -> assertEquals(2, articles.size()),
-                () -> assertEquals("Title 1", articles.get(0).getTitle()),
-                () -> assertEquals("Description 1", articles.get(0).getDescription()),
-                () -> assertEquals("slug-1", articles.get(0).getSlug()),
-                () -> assertEquals("Title 2", articles.get(1).getTitle()),
-                () -> assertEquals("Description 2", articles.get(1).getDescription()),
-                () -> assertEquals("slug-2", articles.get(1).getSlug()));
+        mockMvc.perform(get("/api/articles").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].title", is("Title 1")))
+                .andExpect(jsonPath("$[0].description", is("Description 1")))
+                .andExpect(jsonPath("$[0].slug", is("slug-1")))
+                .andExpect(jsonPath("$[1].title", is("Title 2")))
+                .andExpect(jsonPath("$[1].description", is("Description 2")))
+                .andExpect(jsonPath("$[1].slug", is("slug-2")));
     }
 
     @Test
     @DisplayName("Should return empty list when no articles exist")
-    void getArticles_ReturnsEmptyList() {
+    void getArticles_ReturnsEmptyList() throws Exception {
         when(articleService.getAllArticles()).thenReturn(List.of());
 
-        List<LatestArticle> articles = articleController.getArticles();
-
-        assertNotNull(articles);
-        assertTrue(articles.isEmpty());
+        mockMvc.perform(get("/api/articles").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
     @DisplayName("Should return article when found by slug")
-    void getArticleBySlug_Found() {
-        Article mockArticle = new Article("slug-1", "Content of Article 1");
-        when(articleService.getArticleBySlug("slug-1")).thenReturn(mockArticle);
+    void getArticleBySlug_Found() throws Exception {
+        ArticleContent mockArticleContent =
+                ArticleContent.builder().slug("slug-1").fullContent("Content of Article 1").build();
 
-        ResponseEntity<Article> response = articleController.getArticle("slug-1");
+        when(articleService.getArticleContentBySlug("slug-1")).thenReturn(mockArticleContent);
 
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals("slug-1", response.getBody().getSlug());
-        assertEquals("Content of Article 1", response.getBody().getFullContent());
+        mockMvc.perform(
+                get("/api/articles/{slug}", "slug-1").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.slug", is("slug-1")))
+                .andExpect(jsonPath("$.fullContent", is("Content of Article 1")));
     }
 
     @Test
     @DisplayName("Should return 404 when article not found by slug")
-    void getArticleBySlug_NotFound() {
-        when(articleService.getArticleBySlug("nonexistent")).thenReturn(null);
+    void getArticleBySlug_NotFound() throws Exception {
+        when(articleService.getArticleContentBySlug("nonexistent")).thenReturn(null);
 
-        ResponseEntity<Article> response = articleController.getArticle("nonexistent");
-
-        assertEquals(404, response.getStatusCode().value());
-        assertNull(response.getBody());
+        mockMvc.perform(
+                get("/api/articles/{slug}", "nonexistent").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("Should handle null slug gracefully")
-    void getArticleBySlug_NullSlug() {
-        when(articleService.getArticleBySlug(null)).thenReturn(null);
+    void getArticleBySlug_NullSlug() throws Exception {
+        // When & Then
+        mockMvc.perform(
+                get("/articles/{slug}", (Object) null).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
-        ResponseEntity<Article> response = articleController.getArticle(null);
-
-        assertEquals(404, response.getStatusCode().value());
-        assertNull(response.getBody());
+    @Test
+    @DisplayName("Should handle empty slug gracefully")
+    void getArticleBySlug_EmptySlug() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/articles/{slug}", "").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

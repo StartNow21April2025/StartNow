@@ -3,10 +3,18 @@ const Header = () => (
     <div className="container mx-auto flex justify-between items-center">
       <h1 className="text-2xl font-bold text-green-400">AltTabJournal</h1>
       <nav className="space-x-4">
-        <a href="#" className="text-green-400 hover:text-white">Home</a>
-        <a href="#" className="text-green-400 hover:text-white">Reviews</a>
-        <a href="#" className="text-green-400 hover:text-white">Guides</a>
-        <a href="#" className="text-green-400 hover:text-white">News</a>
+        <a href="#" className="text-green-400 hover:text-white">
+          Home
+        </a>
+        <a href="#" className="text-green-400 hover:text-white">
+          Reviews
+        </a>
+        <a href="#" className="text-green-400 hover:text-white">
+          Guides
+        </a>
+        <a href="#" className="text-green-400 hover:text-white">
+          News
+        </a>
       </nav>
     </div>
   </header>
