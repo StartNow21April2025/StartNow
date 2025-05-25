@@ -1,61 +1,52 @@
 package com.startnow.blog.service_tests;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-
+import com.startnow.blog.entity.ArticleContentEntity;
+import com.startnow.blog.entity.ArticleEntity;
+import com.startnow.blog.exception.ServiceException;
 import com.startnow.blog.model.Article;
-import com.startnow.blog.model.LatestArticle;
+import com.startnow.blog.model.ArticleContent;
+import com.startnow.blog.repository.IArticleContentRepository;
+import com.startnow.blog.repository.IArticleRepository;
 import com.startnow.blog.service.ArticleService;
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.startnow.blog.util.ArticleUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
-import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
-import software.amazon.awssdk.services.dynamodb.model.ScanResponse;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class ArticleServiceTests {
-
-    @Mock
-    private DynamoDbClient dynamoDbClient;
 
     @InjectMocks
     private ArticleService articleService;
 
-    private AutoCloseable mocks;
+    @Mock
+    private IArticleRepository articleRepository;
 
-    @BeforeEach
-    void setUp() {
-        mocks = MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mocks != null) {
-            mocks.close();
-        }
-    }
+    @Mock
+    private IArticleContentRepository articleContentRepository;
 
     @Test
     @DisplayName("Should return all articles when articles exist")
     void getAllArticles_ReturnsList() {
-        Map<String, AttributeValue> item1 =
-                Map.of("title", AttributeValue.fromS("Article 1"), "description",
-                        AttributeValue.fromS("Desc 1"), "slug", AttributeValue.fromS("article-1"));
-        Map<String, AttributeValue> item2 =
-                Map.of("title", AttributeValue.fromS("Article 2"), "description",
-                        AttributeValue.fromS("Desc 2"), "slug", AttributeValue.fromS("article-2"));
-        ScanResponse mockResponse = ScanResponse.builder().items(List.of(item1, item2)).build();
-        when(dynamoDbClient.scan(any(ScanRequest.class))).thenReturn(mockResponse);
+        // Mocking the repository to return a list of ArticleEntity objects
+        List<ArticleEntity> mockArticleEntities = List.of(
+                ArticleEntity.builder().titleId(1).title("Article 1").description("Desc 1")
+                        .slug("article-1").build(),
+                ArticleEntity.builder().titleId(2).title("Article 2").description("Desc 2")
+                        .slug("article-2").build());
 
-        List<LatestArticle> articles = articleService.getAllArticles();
+        when(articleRepository.findAll()).thenReturn(mockArticleEntities);
+        List<Article> articles = articleService.getAllArticles();
 
         assertAll(() -> assertEquals(2, articles.size()),
                 () -> assertEquals("Article 1", articles.get(0).getTitle()),
@@ -64,53 +55,62 @@ class ArticleServiceTests {
                 () -> assertEquals("Article 2", articles.get(1).getTitle()),
                 () -> assertEquals("Desc 2", articles.get(1).getDescription()),
                 () -> assertEquals("article-2", articles.get(1).getSlug()));
+
+        // Verify that the repository and util methods were called correctly
+        verify(articleRepository).findAll();
     }
 
     @Test
     @DisplayName("Should return empty list when no articles exist")
     void getAllArticles_ReturnsEmptyList() {
-        when(dynamoDbClient.scan(any(ScanRequest.class)))
-                .thenReturn(ScanResponse.builder().build());
+        when(articleRepository.findAll()).thenReturn(new ArrayList<>());
 
-        List<LatestArticle> articles = articleService.getAllArticles();
+        List<Article> articles = articleService.getAllArticles();
 
         assertNotNull(articles);
         assertTrue(articles.isEmpty());
+        verify(articleRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Should throw ServiceException when repository throws exception")
+    void getAllArticles_Exception() {
+        when(articleRepository.findAll()).thenThrow(new RuntimeException("Database error"));
+
+        ServiceException exception =
+                assertThrows(ServiceException.class, () -> articleService.getAllArticles());
+
+        assertEquals("Failed to fetch Articles", exception.getMessage());
+        verify(articleRepository).findAll();
     }
 
     @Test
     @DisplayName("Should return article when found by slug")
-    void getArticleBySlug_Found() {
-        Map<String, AttributeValue> item = Map.of("slug", AttributeValue.fromS("article-1"),
-                "fullContent", AttributeValue.fromS("Detailed content of article 1"));
-        ScanResponse mockResponse = ScanResponse.builder().items(List.of(item)).build();
-        when(dynamoDbClient.scan(any(ScanRequest.class))).thenReturn(mockResponse);
+    void getArticleContentBySlug_Found() {
+        String slug = "test-article";
+        ArticleContentEntity contentEntity =
+                ArticleContentEntity.builder().slug(slug).fullContent("Test content").build();
+        ArticleContent expectedContent =
+                ArticleContent.builder().slug(slug).fullContent("Test content").build();
 
-        Article article = articleService.getArticleBySlug("article-1");
+        when(articleContentRepository.findById(slug)).thenReturn(Optional.of(contentEntity));
 
-        assertAll(() -> assertNotNull(article), () -> assertEquals("article-1", article.getSlug()),
-                () -> assertEquals("Detailed content of article 1", article.getFullContent()));
+        ArticleContent articleContent = articleService.getArticleContentBySlug(slug);
+
+        assertNotNull(articleContent);
+        assertEquals(expectedContent.getFullContent(), articleContent.getFullContent());
+        assertEquals(expectedContent.getSlug(), articleContent.getSlug());
+        verify(articleContentRepository).findById(slug);
     }
 
     @Test
     @DisplayName("Should return null when article not found by slug")
-    void getArticleBySlug_NotFound() {
-        when(dynamoDbClient.scan(any(ScanRequest.class)))
-                .thenReturn(ScanResponse.builder().build());
+    void getArticleContentBySlug_NotFound() {
+        when(articleContentRepository.findById("nonexistent")).thenReturn(Optional.empty());
 
-        Article article = articleService.getArticleBySlug("nonexistent");
+        ArticleContent articleContent = articleService.getArticleContentBySlug("nonexistent");
 
-        assertNull(article);
-    }
-
-    @Test
-    @DisplayName("Should return null when slug is null")
-    void getArticleBySlug_NullSlug() {
-        when(dynamoDbClient.scan(any(ScanRequest.class)))
-                .thenReturn(ScanResponse.builder().build());
-
-        Article article = articleService.getArticleBySlug(null);
-
-        assertNull(article);
+        assertNull(articleContent);
+        verify(articleContentRepository).findById("nonexistent");
     }
 }

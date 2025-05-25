@@ -58,7 +58,9 @@ describe("LatestArticles component", () => {
   });
 
   it("logs an error on fetch failure", async () => {
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     global.fetch = jest.fn(() => Promise.reject("API is down"));
 
     render(

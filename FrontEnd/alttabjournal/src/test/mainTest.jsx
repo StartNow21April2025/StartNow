@@ -20,5 +20,7 @@ test("renders the <App /> component with fetched articles", async () => {
   render(<App />);
 
   // Assuming your App or child component renders article title after fetch
-  await waitFor(() => expect(screen.getByText(/Test Article/i)).toBeInTheDocument());
+  await waitFor(() =>
+    expect(screen.getByText(/Test Article/i)).toBeInTheDocument()
+  );
 });

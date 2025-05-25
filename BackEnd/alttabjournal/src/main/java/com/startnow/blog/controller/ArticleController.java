@@ -1,27 +1,32 @@
 package com.startnow.blog.controller;
 
 import com.startnow.blog.model.Article;
-import com.startnow.blog.model.LatestArticle;
-import com.startnow.blog.service.ArticleService;
+import com.startnow.blog.model.ArticleContent;
+import com.startnow.blog.service.ArticleServiceInterface;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /** REST controller for managing Article entities. */
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*") // Allow frontend to call this API
+@Tag(name = "Article Controller", description = "APIs for managing Article")
 public class ArticleController {
 
-    private final ArticleService articleService;
+    private final ArticleServiceInterface articleService;
 
     /**
      * Constructs an ArticleController with the given ArticleService.
      *
      * @param articleService the service to handle article operations
      */
-    public ArticleController(ArticleService articleService) {
+    public ArticleController(ArticleServiceInterface articleService) {
         this.articleService = articleService;
     }
 
@@ -32,7 +37,7 @@ public class ArticleController {
      */
     @GetMapping("/articles")
     @Operation(summary = "Get all Articles")
-    public List<LatestArticle> getArticles() {
+    public List<Article> getArticles() {
         return articleService.getAllArticles();
     }
 
@@ -44,8 +49,14 @@ public class ArticleController {
      */
     @GetMapping("/articles/{slug}")
     @Operation(summary = "Get a specific Article")
-    public ResponseEntity<Article> getArticle(@PathVariable String slug) {
-        Article article = articleService.getArticleBySlug(slug);
-        return article != null ? ResponseEntity.ok(article) : ResponseEntity.notFound().build();
+    public ResponseEntity<ArticleContent> getArticle(@PathVariable(required = false) String slug) {
+        if (slug == null || slug.trim().isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ArticleContent articleContent = articleService.getArticleContentBySlug(slug);
+        return articleContent != null ? ResponseEntity.ok(articleContent)
+                : ResponseEntity.notFound().build();
     }
+
 }

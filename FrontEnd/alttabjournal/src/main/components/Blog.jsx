@@ -4,7 +4,7 @@ import "./Blog.css";
 
 const backgrounds = {
   "top-10-valorant-agents-for-rank-push": "/assets/images/background.jpg",
-  "default": "/assets/images/background.jpg" // Fallback background
+  default: "/assets/images/background.jpg", // Fallback background
 };
 
 const Blog = () => {

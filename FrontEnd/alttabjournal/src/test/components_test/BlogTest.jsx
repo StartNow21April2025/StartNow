@@ -56,7 +56,9 @@ describe("Blog component", () => {
     await screen.findByText("Hello World");
 
     const blogContainer = container.querySelector(".blog-container");
-    expect(blogContainer).toHaveStyle("background-image: url(/assets/images/background.jpg)");
+    expect(blogContainer).toHaveStyle(
+      "background-image: url(/assets/images/background.jpg)"
+    );
   });
 
   it("renders 'Article not found' when article data is empty", async () => {
@@ -76,7 +78,9 @@ describe("Blog component", () => {
   });
 
   it("renders 'Article not found' when fetch fails", async () => {
-    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     global.fetch = jest.fn(() => Promise.reject(new Error("API error")));
 
@@ -90,5 +94,4 @@ describe("Blog component", () => {
 
     consoleError.mockRestore();
   });
-
 });

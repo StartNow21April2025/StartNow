@@ -1,97 +1,113 @@
 package com.startnow.blog.service;
 
-import com.startnow.blog.exception.AgentNotFoundException;
-import com.startnow.blog.model.tablemodel.Agent;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import com.startnow.blog.entity.AgentEntity;
+import com.startnow.blog.exception.ResourceNotFoundException;
+import com.startnow.blog.exception.ServiceException;
+import com.startnow.blog.model.Agent;
+import com.startnow.blog.repository.IAgentRepository;
+import com.startnow.blog.util.AgentUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
 
-@Slf4j
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
-public class AgentService {
+@Slf4j
+@RequiredArgsConstructor
+public class AgentService implements AgentServiceInterface {
+    private final IAgentRepository agentRepository;
 
-    private final DynamoDbClient dynamoDbClient;
-    private final String tableName = "ValorantAgents";
-
-    public AgentService(DynamoDbClient dynamoDbClient) {
-        this.dynamoDbClient = dynamoDbClient;
-    }
-
-    public void createAgent(int agentId, String agentName) {
-        if (agentName == null || agentName.isBlank()) {
-            throw new IllegalArgumentException("Agent name must not be null or empty");
-        }
-        Map<String, AttributeValue> item = new HashMap<>();
-        item.put("agentId", AttributeValue.fromN(String.valueOf(agentId)));
-        item.put("agentName", AttributeValue.fromS(agentName));
-
-        PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(item).build();
-
+    @Override
+    public Agent createAgent(Agent agent) {
         try {
-            dynamoDbClient.putItem(request);
-            log.info("Created agent with id {}", agentId);
-        } catch (DynamoDbException e) {
-            log.error("Failed to create agent", e);
-            throw new RuntimeException("Failed to create agent", e);
+            // If agentId is not set, you might want to generate one
+            AgentEntity newAgent = AgentEntity.builder()
+                    .agentId(agent.getAgentId() != null ? agent.getAgentId() : generateAgentId())
+                    .agentName(agent.getAgentName()).description(agent.getDescription())
+                    .status(agent.getStatus()).createdAt(LocalDateTime.now().toString())
+                    .authorName(agent.getAuthorName()).updatedAt(LocalDateTime.now().toString())
+                    .build(); // Add update timestamp
+
+            // You might want to add validation logic here
+            AgentUtil.validateAgent(newAgent);
+            return AgentUtil.convertToAgent(agentRepository.save(newAgent));
+        } catch (Exception e) {
+            log.error("Error creating agent: {}", e.getMessage());
+            throw new ServiceException("Failed to create agent", e);
         }
     }
 
-    public Optional<Agent> getAgent(int agentId) {
-        GetItemRequest request = GetItemRequest.builder().tableName(tableName)
-                .key(Map.of("agentId", AttributeValue.fromN(String.valueOf(agentId)))).build();
-
+    @Override
+    public Agent updateAgent(Integer agentId, Agent updatedAgent) {
         try {
-            Map<String, AttributeValue> item = dynamoDbClient.getItem(request).item();
-            if (item == null || item.isEmpty()) {
-                return Optional.empty();
+            // Check if agent exists and throw exception if not found
+            Agent existingAgent = getAgentById(agentId);
+
+            // Create updated entity preserving original creation time and id
+            AgentEntity updatedAgentEntity = AgentEntity.builder().agentId(agentId)
+                    .agentName(updatedAgent.getAgentName())
+                    .description(updatedAgent.getDescription()).status(updatedAgent.getStatus())
+                    .createdAt(existingAgent.getCreatedAt()) // Preserve original creation time
+                    .updatedAt(LocalDateTime.now().toString()) // Add update timestamp
+                    .build();
+
+            // Validate the updated entity
+            AgentUtil.validateAgent(updatedAgentEntity);
+
+            return AgentUtil.convertToAgent(agentRepository.save(updatedAgentEntity));
+        } catch (ResourceNotFoundException e) {
+            log.error("Agent not found with id {}", agentId);
+            throw e;
+        } catch (Exception e) {
+            log.error("Error updating agent with id {}: {}", agentId, e.getMessage());
+            throw new ServiceException("Failed to update agent", e);
+        }
+    }
+
+    @Override
+    public Agent getAgentById(Integer agentId) {
+        Optional<AgentEntity> agentEntity = agentRepository.findById(agentId);
+        if (agentEntity.isEmpty()) {
+            throw new ResourceNotFoundException("Agent not found with id: " + agentId);
+        }
+        return AgentUtil.convertToAgent(agentEntity.get());
+    }
+
+    @Override
+    public List<Agent> getAllAgents() {
+        try {
+            return agentRepository.findAll().stream().map(AgentUtil::convertToAgent) // or use a
+                                                                                     // mapper
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching all agents: {}", e.getMessage(), e);
+            throw new ServiceException("Failed to fetch agents", e);
+        }
+    }
+
+    @Override
+    public void deleteAgent(Integer agentId) {
+        try {
+            // Check if agentName exists before deleting
+            if (agentRepository.findById(agentId).isEmpty()) {
+                throw new ResourceNotFoundException("Agent not found with id: " + agentId);
             }
-            Agent agent = new Agent();
-            agent.setAgentId(Integer.parseInt(item.get("agentId").n()));
-            agent.setAgentName(item.get("agentName").s());
-            return Optional.of(agent);
-        } catch (DynamoDbException e) {
-            log.error("Failed to get agent", e);
-            throw new RuntimeException("Failed to get agent", e);
+            agentRepository.delete(agentId);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error deleting agentName with id {}: {}", agentId, e.getMessage());
+            throw new ServiceException("Failed to delete agentName", e);
         }
     }
 
-    public void updateAgent(int agentId, String agentName) {
-        if (agentName == null || agentName.isBlank()) {
-            throw new IllegalArgumentException("Agent name must not be null or empty");
-        }
-        Map<String, AttributeValue> item = new HashMap<>();
-        item.put("agentId", AttributeValue.fromN(String.valueOf(agentId)));
-        item.put("agentName", AttributeValue.fromS(agentName));
-
-        PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(item)
-                .conditionExpression("attribute_exists(agentId)").build();
-
-        try {
-            dynamoDbClient.putItem(request);
-            log.info("Updated agent with id {}", agentId);
-        } catch (ConditionalCheckFailedException e) {
-            log.warn("Agent with id {} not found for update", agentId);
-            throw new AgentNotFoundException("Agent with ID " + agentId + " does not exist.");
-        } catch (DynamoDbException e) {
-            log.error("Failed to update agent", e);
-            throw new RuntimeException("Failed to update agent", e);
-        }
-    }
-
-    public void deleteAgent(int agentId) {
-        DeleteItemRequest request = DeleteItemRequest.builder().tableName(tableName)
-                .key(Map.of("agentId", AttributeValue.fromN(String.valueOf(agentId)))).build();
-
-        try {
-            dynamoDbClient.deleteItem(request);
-            log.info("Deleted agent with id {}", agentId);
-        } catch (DynamoDbException e) {
-            log.error("Failed to delete agent", e);
-            throw new RuntimeException("Failed to delete agent", e);
-        }
+    private Integer generateAgentId() {
+        // Implement your ID generation strategy
+        // This is a simple example - you might want to use a more sophisticated approach
+        return Math.toIntExact(System.currentTimeMillis());
     }
 }

@@ -1,109 +1,175 @@
 package com.startnow.blog.controller_tests;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.startnow.blog.controller.AgentController;
-import com.startnow.blog.model.tablemodel.Agent;
+import com.startnow.blog.exception_handler.GlobalExceptionHandler;
+import com.startnow.blog.exception.ResourceNotFoundException;
+import com.startnow.blog.exception.ServiceException;
+import com.startnow.blog.model.Agent;
 import com.startnow.blog.service.AgentService;
-import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
+import com.startnow.blog.service.AgentServiceInterface;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@ExtendWith(MockitoExtension.class)
 class AgentControllerTests {
 
-    @Mock
-    private AgentService agentService;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private AgentController agentController;
 
-    private AutoCloseable mocks;
+    @Mock
+    private AgentServiceInterface agentService;
+
+    private Agent testAgent;
 
     @BeforeEach
     void setUp() {
-        mocks = MockitoAnnotations.openMocks(this);
-    }
+        testAgent =
+                Agent.builder().agentId(1).agentName("Test Agent").description("Test Description")
+                        .status("ACTIVE").createdAt(LocalDateTime.now().toString()).build();
 
-    @AfterEach
-    void tearDown() throws Exception {
-        if (mocks != null) {
-            mocks.close();
-        }
-    }
-
-    @Test
-    @DisplayName("Should create agent and return 200")
-    void createAgent_Returns200() {
-        Agent agent = new Agent(1, "Phoenix");
-        doNothing().when(agentService).createAgent(agent.getAgentId(), agent.getAgentName());
-
-        ResponseEntity<Void> response = agentController.create(agent);
-
-        assertEquals(200, response.getStatusCode().value());
-        verify(agentService, times(1)).createAgent(agent.getAgentId(), agent.getAgentName());
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        mockMvc = MockMvcBuilders.standaloneSetup(agentController)
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
     }
 
     @Test
-    @DisplayName("Should return agent when found by ID")
-    void getAgentById_Found() {
-        Agent mockAgent = new Agent(1, "Jett");
-        when(agentService.getAgent(1)).thenReturn(Optional.of(mockAgent));
+    void createAgent() throws Exception {
+        // Given
+        Agent testAgent = new Agent();
+        testAgent.setAgentId(123);
+        testAgent.setAgentName("Test Agent");
+        testAgent.setStatus("ACTIVE");
 
-        ResponseEntity<Agent> response = agentController.read(1);
+        when(agentService.createAgent(any(Agent.class))).thenReturn(testAgent);
 
-        assertAll(() -> assertEquals(200, response.getStatusCode().value()),
-                () -> assertNotNull(response.getBody()),
-                () -> assertEquals(1, response.getBody().getAgentId()),
-                () -> assertEquals("Jett", response.getBody().getAgentName()));
+        // When/Then
+        mockMvc.perform(post("/api/agents").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testAgent)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.agentId").value(testAgent.getAgentId()))
+                .andExpect(jsonPath("$.agentName").value(testAgent.getAgentName()))
+                .andExpect(jsonPath("$.status").value(testAgent.getStatus())).andDo(print());
+
+        // Verify that service was called
+        verify(agentService, times(1)).createAgent(any(Agent.class));
     }
 
     @Test
-    @DisplayName("Should return 404 when agent not found by ID")
-    void getAgentById_NotFound() {
-        when(agentService.getAgent(999)).thenReturn(Optional.empty());
+    void createAgent_WithInvalidData_ShouldReturnBadRequest() throws Exception {
 
-        ResponseEntity<Agent> response = agentController.read(999);
-
-        assertEquals(404, response.getStatusCode().value());
-        assertNull(response.getBody());
+        // When/Then
+        mockMvc.perform(post("/api/agents").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(null))).andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("Should update agent and return 200")
-    void updateAgent_Returns200() {
-        Agent updatedAgent = new Agent(1, "Sage");
-        doNothing().when(agentService).updateAgent(updatedAgent.getAgentId(),
-                updatedAgent.getAgentName());
+    void createAgent_WhenServiceThrowsException_ShouldReturnInternalServerError() throws Exception {
+        // Given
+        ServiceException serviceException = new ServiceException("Failed to create agent");
+        when(agentService.createAgent(any(Agent.class))).thenThrow(serviceException);
 
-        ResponseEntity<Void> response = agentController.update(1, updatedAgent);
+        // When/Then
+        mockMvc.perform(post("/api/agents").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testAgent)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.message").exists()).andDo(print());
 
-        assertEquals(200, response.getStatusCode().value());
-        verify(agentService, times(1)).updateAgent(updatedAgent.getAgentId(),
-                updatedAgent.getAgentName());
+        verify(agentService, times(1)).createAgent(any(Agent.class));
+    }
+
+
+    @Test
+    void getAgentById_ShouldReturnAgent() throws Exception {
+        when(agentService.getAgentById(1)).thenReturn(testAgent);
+
+        mockMvc.perform(get("/api/agents/{id}", 1)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.agentId").value(testAgent.getAgentId()))
+                .andExpect(jsonPath("$.agentName").value(testAgent.getAgentName()));
     }
 
     @Test
-    @DisplayName("Should delete agent and return 200")
-    void deleteAgent_Returns200() {
+    void getAgentById_WhenNotFound_ShouldReturn404() throws Exception {
+        when(agentService.getAgentById(999))
+                .thenThrow(new ResourceNotFoundException("Agent not found with id: 999"));
+
+        mockMvc.perform(get("/api/agents/{id}", 999)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAllAgents_ShouldReturnList() throws Exception {
+        List<Agent> agents = new ArrayList<>();
+        agents.add(testAgent);
+        when(agentService.getAllAgents()).thenReturn(agents);
+
+        mockMvc.perform(get("/api/agents/all")).andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].agentId").value(testAgent.getAgentId()))
+                .andExpect(jsonPath("$[0].agentName").value(testAgent.getAgentName()));
+    }
+
+
+    @Test
+    void updateAgent_ShouldReturnUpdatedAgent() throws Exception {
+        Agent updatedAgent =
+                Agent.builder().agentId(1).agentName("Updated Agent").status("INACTIVE").build();
+
+        when(agentService.updateAgent(eq(1), any(Agent.class))).thenReturn(updatedAgent);
+
+        mockMvc.perform(put("/api/agents/{id}", 1).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedAgent))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.agentName").value("Updated Agent"))
+                .andExpect(jsonPath("$.status").value("INACTIVE"));
+    }
+
+    @Test
+    void deleteAgent_ShouldReturn204() throws Exception {
         doNothing().when(agentService).deleteAgent(1);
 
-        ResponseEntity<Void> response = agentController.delete(1);
-
-        assertEquals(200, response.getStatusCode().value());
-        verify(agentService, times(1)).deleteAgent(1);
+        mockMvc.perform(delete("/api/agents/{id}", 1)).andExpect(status().isNoContent());
     }
 
     @Test
-    @DisplayName("Should handle null agent on create gracefully")
-    void createAgent_NullAgent() {
-        ResponseEntity<Void> response = agentController.create(null);
-        assertEquals(400, response.getStatusCode().value());
+    void updateAgent_WhenNotFound_ShouldReturn404() throws Exception {
+        Agent updateRequest = Agent.builder().agentName("Updated Name").status("active").build();
+
+        when(agentService.updateAgent(eq(999), any(Agent.class)))
+                .thenThrow(new ResourceNotFoundException("Agent not found with id: 999"));
+
+        mockMvc.perform(put("/api/agents/{id}", 999).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Agent not found with id: 999"));
     }
 }
+
