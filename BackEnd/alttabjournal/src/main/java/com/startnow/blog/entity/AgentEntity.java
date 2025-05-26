@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 public class AgentEntity {
     private Integer agentId;
     private String agentName;
+    private String agentTitle;
+    private String tagLine;
     private String description;
     private String authorName;
     private String createdAt;
@@ -35,7 +37,17 @@ public class AgentEntity {
         return agentName;
     }
 
-    @DynamoDbAttribute("fullContent")
+    @DynamoDbAttribute("agentTitle")
+    public String getAgentTitle() {
+        return agentTitle;
+    }
+
+    @DynamoDbAttribute("tagLine")
+    public String getTagLine() {
+        return tagLine;
+    }
+
+    @DynamoDbAttribute("description")
     public String getDescription() {
         return description;
     }

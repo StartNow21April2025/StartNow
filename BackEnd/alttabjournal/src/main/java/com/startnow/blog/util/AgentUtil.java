@@ -19,8 +19,10 @@ public final class AgentUtil {
         }
 
         return Agent.builder().agentId(entity.getAgentId()).agentName(entity.getAgentName())
+                .agentTitle(entity.getAgentTitle()).tagLine(entity.getTagLine())
                 .description(entity.getDescription()).status(entity.getStatus())
-                .authorName(entity.getAuthorName()).createdAt(entity.getCreatedAt()).build();
+                .authorName(entity.getAuthorName()).createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt()).build();
     }
 
     public static AgentEntity convertToAgentEntity(Agent agent) {
@@ -29,8 +31,10 @@ public final class AgentUtil {
         }
 
         return AgentEntity.builder().agentId(agent.getAgentId()).agentName(agent.getAgentName())
+                .agentTitle(agent.getAgentTitle()).tagLine(agent.getTagLine())
                 .description(agent.getDescription()).status(agent.getStatus())
-                .authorName(agent.getAuthorName()).createdAt(agent.getCreatedAt()).build();
+                .authorName(agent.getAuthorName()).updatedAt(agent.getUpdatedAt())
+                .createdAt(agent.getCreatedAt()).build();
     }
 
     public static void validateAgent(AgentEntity agent) {

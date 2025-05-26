@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 // Agent Repository Interface
-public interface IAgentRepository {
+public interface IAgentRepository extends BaseRepository<AgentEntity, Integer> {
 
     public AgentEntity save(AgentEntity agentEntity);
 
