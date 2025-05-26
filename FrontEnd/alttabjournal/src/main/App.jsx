@@ -4,6 +4,7 @@ import FeaturedPost from "./components/FeaturedPost";
 import LatestArticles from "./components/LatestArticles";
 import Footer from "./components/Footer";
 import Blog from "./components/Blog"; // New Blog Component
+import Community from './components/Community';
 
 const App = () => (
   <Router>
@@ -27,6 +28,7 @@ const App = () => (
             }
           />
           <Route path="/blog/:slug" element={<Blog />} />
+          <Route path="/community" element={<Community />} />
         </Routes>
         <Footer />
       </div>
