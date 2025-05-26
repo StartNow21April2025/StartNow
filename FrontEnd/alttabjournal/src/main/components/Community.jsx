@@ -1,25 +1,25 @@
-import React, { useEffect, useState, useRef } from 'react';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
+import React, { useEffect, useState, useRef } from "react";
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 
 const Community = () => {
-  const [username, setUsername] = useState('');
-  const [messageInput, setMessageInput] = useState('');
+  const [username, setUsername] = useState("");
+  const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState([]);
   const stompClientRef = useRef(null);
   const hasSubscribedRef = useRef(false);
 
   useEffect(() => {
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS("http://localhost:8080/ws");
     const stompClient = Stomp.over(socket);
     stompClient.connect({}, () => {
       console.log("Connected to WebSocket");
 
       // Subscribe only once
       if (!hasSubscribedRef.current) {
-        stompClient.subscribe('/topic/group', (response) => {
+        stompClient.subscribe("/topic/group", (response) => {
           const msg = JSON.parse(response.body);
-          setMessages(prev => [...prev, `${msg.sender}: ${msg.content}`]);
+          setMessages((prev) => [...prev, `${msg.sender}: ${msg.content}`]);
         });
         hasSubscribedRef.current = true;
       }
@@ -29,15 +29,15 @@ const Community = () => {
 
     // Load previous group messages
     fetch("http://localhost:8080/api/group/messages")
-      .then(res => res.json())
-      .then(data => {
-        const loaded = data.map(msg => `${msg.sender}: ${msg.content}`);
+      .then((res) => res.json())
+      .then((data) => {
+        const loaded = data.map((msg) => `${msg.sender}: ${msg.content}`);
         setMessages(loaded);
       });
 
     return () => {
       if (stompClientRef.current) {
-       /*  stompClientRef.current.disconnect(); */
+        /*  stompClientRef.current.disconnect(); */
       }
     };
   }, []);
@@ -53,13 +53,17 @@ const Community = () => {
       return;
     }
 
-    stompClientRef.current.send("/app/sendGroupMessage", {}, JSON.stringify({
-      sender: username,
-      content: messageInput,
-      receiver: "group"
-    }));
+    stompClientRef.current.send(
+      "/app/sendGroupMessage",
+      {},
+      JSON.stringify({
+        sender: username,
+        content: messageInput,
+        receiver: "group",
+      })
+    );
 
-    setMessageInput('');
+    setMessageInput("");
   };
 
   return (
@@ -91,7 +95,9 @@ const Community = () => {
 
       <ul className="list-disc pl-5">
         {messages.map((msg, idx) => (
-          <li key={idx} className="mb-1">{msg}</li>
+          <li key={idx} className="mb-1">
+            {msg}
+          </li>
         ))}
       </ul>
     </div>
