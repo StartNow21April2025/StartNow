@@ -9,12 +9,12 @@ export default [
   },
   js.configs.recommended,
   {
+    // Base configuration for all files
     plugins: {
       react,
       jsxA11y,
       prettier,
     },
-    files: ["src/**/*.js", "src/**/*.jsx"],
     languageOptions: {
       parserOptions: {
         ecmaVersion: "latest",
@@ -23,17 +23,74 @@ export default [
           jsx: true,
         },
       },
+      globals: {
+        // Browser globals
+        window: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        console: "readonly",
+        alert: "readonly",
+      },
     },
     rules: {
-      // If you're using the automatic JSX runtime, you can disable this:
       "react/react-in-jsx-scope": "off",
-      // These two rules are important for marking JSX variables as "used":
       "react/jsx-uses-react": "error",
       "react/jsx-uses-vars": "error",
       semi: ["error", "always"],
       quotes: ["error", "double"],
-      "no-undef": "off",
+      "no-undef": "error",
       "prettier/prettier": "error",
+    },
+  },
+  // Test files configuration
+  {
+    files: [
+      "**/*.test.js",
+      "**/*.test.jsx",
+      "**/*.spec.js",
+      "**/*.spec.jsx",
+      "**/jest.setup.js",
+      "src/test/**/*.jsx",
+    ],
+    languageOptions: {
+      globals: {
+        // Jest globals
+        jest: "readonly",
+        describe: "readonly",
+        it: "readonly",
+        test: "readonly",
+        expect: "readonly",
+        beforeEach: "readonly",
+        afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
+        global: "readonly",
+        // Browser globals (also needed in tests)
+        window: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        console: "readonly",
+        alert: "readonly",
+      },
+    },
+    settings: {
+      jest: {
+        version: "detect",
+      },
+    },
+  },
+  // Source files configuration
+  {
+    files: ["src/main/**/*.jsx", "src/main/**/*.js"],
+    languageOptions: {
+      globals: {
+        // Browser globals for source files
+        window: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        console: "readonly",
+        alert: "readonly",
+      },
     },
   },
 ];
