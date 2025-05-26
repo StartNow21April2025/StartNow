@@ -44,4 +44,9 @@ public class ChatMessage {
                 && Objects.equals(content, that.content)
                 && Objects.equals(timestamp, that.timestamp);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sender, receiver, content, timestamp);
+    }
 }
