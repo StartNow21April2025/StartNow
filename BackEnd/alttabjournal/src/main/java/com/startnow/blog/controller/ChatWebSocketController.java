@@ -21,12 +21,12 @@ public class ChatWebSocketController {
 
     @MessageMapping("/sendMessage")
     public void sendMessage(ChatMessage message) {
-    	System.out.println(message);
+        System.out.println(message);
         chatService.saveMessage(message);
         messagingTemplate.convertAndSend("/topic/messages/" + message.getReceiver(), message);
-        messagingTemplate.convertAndSend("/topic/messages/" + message.getSender(), message); 
+        messagingTemplate.convertAndSend("/topic/messages/" + message.getSender(), message);
     }
-    
+
     @MessageMapping("/sendGroupMessage")
     public void sendGroupMessage(ChatMessage message) {
         message.setReceiver("group"); // just to maintain consistency

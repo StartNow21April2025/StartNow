@@ -21,19 +21,18 @@ public class ChatService {
 
     public List<ChatMessage> getChatHistory(String user1, String user2) {
         return messages.stream()
-            .filter(msg -> (msg.getSender().equals(user1) && msg.getReceiver().equals(user2)) ||
-                           (msg.getSender().equals(user2) && msg.getReceiver().equals(user1)))
-            .collect(Collectors.toList());
+                .filter(msg -> (msg.getSender().equals(user1) && msg.getReceiver().equals(user2))
+                        || (msg.getSender().equals(user2) && msg.getReceiver().equals(user1)))
+                .collect(Collectors.toList());
     }
-    
+
     public List<ChatMessage> getAllMessages() {
         return new ArrayList<>(messages);
     }
-    
+
     public List<ChatMessage> getGroupMessages() {
-        return messages.stream()
-            .filter(msg -> "group".equals(msg.getReceiver()))
-            .collect(Collectors.toList());
+        return messages.stream().filter(msg -> "group".equals(msg.getReceiver()))
+                .collect(Collectors.toList());
     }
 }
 

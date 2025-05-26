@@ -21,13 +21,14 @@ public class ChatController {
     private ChatService chatService;
 
     @GetMapping("/history")
-    public List<ChatMessage> getChatHistory(@RequestParam String user1, @RequestParam String user2) {
+    public List<ChatMessage> getChatHistory(@RequestParam String user1,
+            @RequestParam String user2) {
         return chatService.getChatHistory(user1, user2);
     }
-    
+
     @GetMapping("/api/chat/group-history")
     public List<ChatMessage> getGroupChatHistory() {
-        return chatService.getAllMessages();  // Or filter with no receiver
+        return chatService.getAllMessages(); // Or filter with no receiver
     }
 }
 
