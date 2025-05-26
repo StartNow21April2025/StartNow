@@ -17,11 +17,15 @@ public class Agent {
     private Integer agentId;
     @NotBlank(message = "Agent Name is required")
     private String agentName;
+    private String agentTitle;
+    private String tagLine;
     private String description;
     @NotBlank(message = "Status is required")
     private String status;
     private String authorName;
     @Hidden
     private String createdAt;
+    @Hidden
+    private String updatedAt;
 }
 

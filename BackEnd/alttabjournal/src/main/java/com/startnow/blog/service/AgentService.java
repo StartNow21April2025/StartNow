@@ -27,7 +27,8 @@ public class AgentService implements AgentServiceInterface {
             // If agentId is not set, you might want to generate one
             AgentEntity newAgent = AgentEntity.builder()
                     .agentId(agent.getAgentId() != null ? agent.getAgentId() : generateAgentId())
-                    .agentName(agent.getAgentName()).description(agent.getDescription())
+                    .agentName(agent.getAgentName()).tagLine(agent.getTagLine())
+                    .agentTitle(agent.getAgentTitle()).description(agent.getDescription())
                     .status(agent.getStatus()).createdAt(LocalDateTime.now().toString())
                     .authorName(agent.getAuthorName()).updatedAt(LocalDateTime.now().toString())
                     .build(); // Add update timestamp
@@ -49,11 +50,14 @@ public class AgentService implements AgentServiceInterface {
 
             // Create updated entity preserving original creation time and id
             AgentEntity updatedAgentEntity = AgentEntity.builder().agentId(agentId)
-                    .agentName(updatedAgent.getAgentName())
-                    .description(updatedAgent.getDescription()).status(updatedAgent.getStatus())
-                    .createdAt(existingAgent.getCreatedAt()) // Preserve original creation time
-                    .updatedAt(LocalDateTime.now().toString()) // Add update timestamp
-                    .build();
+                    .agentName(updatedAgent.getAgentName()).agentTitle(updatedAgent.getAgentTitle())
+                    .tagLine(updatedAgent.getTagLine()).description(updatedAgent.getDescription())
+                    .status(updatedAgent.getStatus()).createdAt(existingAgent.getCreatedAt()) // Preserve
+                                                                                              // original
+                                                                                              // creation
+                                                                                              // time
+                    .updatedAt(LocalDateTime.now().toString())// Add update timestamp
+                    .authorName(updatedAgent.getAuthorName()).build();
 
             // Validate the updated entity
             AgentUtil.validateAgent(updatedAgentEntity);
@@ -80,8 +84,8 @@ public class AgentService implements AgentServiceInterface {
     @Override
     public List<Agent> getAllAgents() {
         try {
-            return agentRepository.findAll().stream().map(AgentUtil::convertToAgent) // or use a
-                                                                                     // mapper
+            return agentRepository.findAll().stream().map(AgentUtil::convertToAgent)
+                    .filter(agent -> agent != null && agent.getStatus().equals("active"))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Error fetching all agents: {}", e.getMessage(), e);
