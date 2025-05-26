@@ -1,8 +1,10 @@
 package com.startnow.blog.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,45 +13,35 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ChatMessage {
-
     private String sender;
     private String receiver;
     private String content;
-    private LocalDateTime timestamp;
+    @Builder.Default
+    private LocalDateTime timestamp = LocalDateTime.now();
 
-    public String getSender() {
-        return sender;
+    @Override
+    public String toString() {
+        return String.format("ChatMessage{sender='%s', receiver='%s', content='%s', timestamp=%s}",
+                Objects.toString(sender, ""), Objects.toString(receiver, ""),
+                content != null
+                        ? (content.length() > 50 ? content.substring(0, 47) + "..." : content)
+                        : "",
+                Objects.toString(timestamp, "NO_TIMESTAMP"));
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChatMessage that = (ChatMessage) o;
+        return Objects.equals(sender, that.sender) && Objects.equals(receiver, that.receiver)
+                && Objects.equals(content, that.content)
+                && Objects.equals(timestamp, that.timestamp);
     }
-
-    public String getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(String receiver) {
-        this.receiver = receiver;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-
-
 }
