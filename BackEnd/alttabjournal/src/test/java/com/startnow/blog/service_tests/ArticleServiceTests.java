@@ -88,17 +88,14 @@ class ArticleServiceTests {
     @DisplayName("Should return article when found by slug")
     void getArticleContentBySlug_Found() {
         String slug = "test-article";
-        ArticleContentEntity contentEntity =
-                ArticleContentEntity.builder().slug(slug).fullContent("Test content").build();
-        ArticleContent expectedContent =
-                ArticleContent.builder().slug(slug).fullContent("Test content").build();
+        ArticleContentEntity contentEntity = ArticleContentEntity.builder().slug(slug).build();
+        ArticleContent expectedContent = ArticleContent.builder().slug(slug).build();
 
         when(articleContentRepository.findById(slug)).thenReturn(Optional.of(contentEntity));
 
         ArticleContent articleContent = articleService.getArticleContentBySlug(slug);
 
         assertNotNull(articleContent);
-        assertEquals(expectedContent.getFullContent(), articleContent.getFullContent());
         assertEquals(expectedContent.getSlug(), articleContent.getSlug());
         verify(articleContentRepository).findById(slug);
     }

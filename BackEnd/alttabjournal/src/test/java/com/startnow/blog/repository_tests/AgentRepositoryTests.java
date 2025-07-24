@@ -53,7 +53,7 @@ class AgentRepositoryTests {
         // Assert
         assertNotNull(savedAgent);
         assertEquals(AGENT_ID, savedAgent.getAgentId());
-        assertEquals(AGENT_NAME, savedAgent.getAgentName());
+        assertEquals(AGENT_NAME, savedAgent.getName());
         verify(agentTable).putItem(agent);
     }
 
@@ -82,7 +82,7 @@ class AgentRepositoryTests {
         // Assert
         assertTrue(result.isPresent());
         assertEquals(AGENT_ID, result.get().getAgentId());
-        assertEquals(AGENT_NAME, result.get().getAgentName());
+        assertEquals(AGENT_NAME, result.get().getName());
     }
 
     @Test
@@ -145,7 +145,7 @@ class AgentRepositoryTests {
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(AGENT_ID, result.get(0).getAgentId());
-        assertEquals(AGENT_NAME, result.get(0).getAgentName());
+        assertEquals(AGENT_NAME, result.get(0).getName());
     }
 
     @Test
@@ -160,17 +160,17 @@ class AgentRepositoryTests {
     }
 
     private AgentEntity createSampleAgent() {
-        return AgentEntity.builder().agentId(AGENT_ID).agentName(AGENT_NAME)
+        return AgentEntity.builder().agentId(AGENT_ID).name(AGENT_NAME)
                 .description("Test Description").createdAt("2024-01-01").updatedAt("2024-01-01")
                 .build();
     }
 
     private List<AgentEntity> createSampleAgentList() {
         List<AgentEntity> agents = new ArrayList<>();
-        agents.add(AgentEntity.builder().agentId(AGENT_ID).agentName(AGENT_NAME)
+        agents.add(AgentEntity.builder().agentId(AGENT_ID).name(AGENT_NAME)
                 .description("Test Description 1").createdAt("2024-01-01").updatedAt("2024-01-01")
                 .build());
-        agents.add(AgentEntity.builder().agentId(456).agentName("Test Agent 2")
+        agents.add(AgentEntity.builder().agentId(456).name("Test Agent 2")
                 .description("Test Description 2").createdAt("2024-01-01").updatedAt("2024-01-01")
                 .build());
         return agents;

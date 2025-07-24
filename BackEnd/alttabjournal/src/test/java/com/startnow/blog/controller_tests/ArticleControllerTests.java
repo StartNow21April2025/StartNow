@@ -76,15 +76,13 @@ class ArticleControllerTests {
     @Test
     @DisplayName("Should return article when found by slug")
     void getArticleBySlug_Found() throws Exception {
-        ArticleContent mockArticleContent =
-                ArticleContent.builder().slug("slug-1").fullContent("Content of Article 1").build();
+        ArticleContent mockArticleContent = ArticleContent.builder().slug("slug-1").build();
 
         when(articleService.getArticleContentBySlug("slug-1")).thenReturn(mockArticleContent);
 
         mockMvc.perform(
                 get("/api/articles/{slug}", "slug-1").contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.slug", is("slug-1")))
-                .andExpect(jsonPath("$.fullContent", is("Content of Article 1")));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.slug", is("slug-1")));
     }
 
     @Test

@@ -69,4 +69,25 @@ public class ArticleService implements ArticleServiceInterface {
             throw new ServiceException("Failed to fetch Article", e);
         }
     }
+
+    /**
+     * Retrieves articles for list of id with summary information.
+     */
+    @Override
+    public List<Article> getArticlesByIds(List<Integer> ids) {
+        try {
+            List<ArticleEntity> articleEntityList = articleRepository.findByIds(ids);
+            if (articleEntityList.isEmpty()) {
+                logger.warn("Articles not found for list of ids {} in the database.", ids);
+                return new ArrayList<>();
+            }
+            logger.info("Fetched {} articles for list of ids {} from table {}",
+                    articleEntityList.size(), ids, "Articles");
+            return articleEntityList.stream().filter(Objects::nonNull)
+                    .map(ArticleUtil::convertToArticle).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching all Articles: {}", e.getMessage(), e);
+            throw new ServiceException("Failed to fetch Articles", e);
+        }
+    }
 }

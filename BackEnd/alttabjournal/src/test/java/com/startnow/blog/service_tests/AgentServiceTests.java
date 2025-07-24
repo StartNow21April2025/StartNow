@@ -32,9 +32,9 @@ class AgentServiceTests {
 
     @BeforeEach
     void setUp() {
-        agent = Agent.builder().agentId(1).agentName("Jett").status("active").build();
+        agent = Agent.builder().agentId(1).name("Jett").status("active").build();
 
-        agentEntity = AgentEntity.builder().agentId(1).agentName("Jett").status("active").build();
+        agentEntity = AgentEntity.builder().agentId(1).name("Jett").status("active").build();
     }
 
     @Test
@@ -46,7 +46,7 @@ class AgentServiceTests {
 
         assertNotNull(result);
         assertEquals(agent.getAgentId(), result.getAgentId());
-        assertEquals(agent.getAgentName(), result.getAgentName());
+        assertEquals(agent.getName(), result.getName());
         assertEquals(agent.getStatus(), result.getStatus());
         verify(agentRepository, times(1)).save(any());
     }
@@ -60,7 +60,7 @@ class AgentServiceTests {
 
         assertAll(() -> assertEquals(1, result.getAgentId()),
                 () -> assertEquals("active", result.getStatus()),
-                () -> assertEquals("Jett", result.getAgentName()));
+                () -> assertEquals("Jett", result.getName()));
         verify(agentRepository, times(1)).findById(any());
     }
 
@@ -78,9 +78,9 @@ class AgentServiceTests {
     @Test
     @DisplayName("Should update agent successfully")
     void updateAgent_Success() {
-        Agent updateAgent = Agent.builder().agentId(1).agentName("Sage").status("active").build();
+        Agent updateAgent = Agent.builder().agentId(1).name("Sage").status("active").build();
         AgentEntity updateAgentEntity =
-                AgentEntity.builder().agentId(1).agentName("Sage").status("active").build();
+                AgentEntity.builder().agentId(1).name("Sage").status("active").build();
 
         when(agentRepository.findById(any())).thenReturn(Optional.of(agentEntity));
         when(agentRepository.save(any())).thenReturn(updateAgentEntity);

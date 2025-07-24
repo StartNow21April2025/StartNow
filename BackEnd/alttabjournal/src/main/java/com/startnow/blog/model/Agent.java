@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,11 +14,13 @@ import java.time.LocalDateTime;
 public class Agent {
     private Integer agentId;
     @NotBlank(message = "Agent Name is required")
-    private String agentName;
-    private String agentTitle;
-    private String tagLine;
+    private String name;
+    private String title;
+    private String quote;
     private String description;
-    @NotBlank(message = "Status is required")
+    private String imageUrl;
+    private String strengths;
+    private String weaknesses;
     private String status;
     private String authorName;
     @Hidden
