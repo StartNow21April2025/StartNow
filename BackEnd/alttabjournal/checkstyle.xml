@@ -4,6 +4,9 @@
         "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+    <module name="SuppressionFilter">
+        <property name="file" value="suppressions.xml"/>
+    </module>
     <module name="FileTabCharacter"/>
     <module name="LineLength">
         <property name="max" value="120"/>

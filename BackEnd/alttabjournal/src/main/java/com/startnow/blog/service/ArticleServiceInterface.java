@@ -11,4 +11,6 @@ public interface ArticleServiceInterface {
 
     public ArticleContent getArticleContentBySlug(String slug);
 
+    public List<Article> getArticlesByIds(List<Integer> ids);
+
 }

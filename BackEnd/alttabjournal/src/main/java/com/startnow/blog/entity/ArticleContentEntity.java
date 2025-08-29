@@ -1,14 +1,17 @@
 package com.startnow.blog.entity;
 
+import com.startnow.blog.model.ArticleSection;
+import com.startnow.blog.util.ArticleSectionListConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @DynamoDbBean
 @NoArgsConstructor
@@ -17,10 +20,10 @@ import java.time.LocalDateTime;
 @Data
 public class ArticleContentEntity {
     private String slug;
-    private String fullContent;
-    private String authorName;
-    private String createdAt;
-    public String updatedAt;
+    private String author;
+    private String date;
+    private String title;
+    private ArrayList<ArticleSection> sections;
     private String status;
 
     @DynamoDbPartitionKey
@@ -29,24 +32,25 @@ public class ArticleContentEntity {
         return slug;
     }
 
-    @DynamoDbAttribute("fullContent")
-    public String getFullContent() {
-        return fullContent;
+    @DynamoDbAttribute("author")
+    public String getAuthor() {
+        return author;
     }
 
-    @DynamoDbAttribute("authorName")
-    public String getAuthorName() {
-        return authorName;
+    @DynamoDbAttribute("date")
+    public String getDate() {
+        return date;
     }
 
-    @DynamoDbAttribute("createdAt")
-    public String getCreatedAt() {
-        return createdAt;
+    @DynamoDbAttribute("title")
+    public String getTitle() {
+        return title;
     }
 
-    @DynamoDbAttribute("updatedAt")
-    public String getUpdatedAt() {
-        return updatedAt;
+    @DynamoDbAttribute("sections")
+    @DynamoDbConvertedBy(ArticleSectionListConverter.class)
+    public ArrayList<ArticleSection> getSections() {
+        return sections != null ? sections : new ArrayList<>();
     }
 
     @DynamoDbAttribute("status")

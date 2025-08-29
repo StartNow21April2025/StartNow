@@ -3,6 +3,46 @@
 @tailwind utilities;
 
 body {
+  background-color: #1e293b; /* dark background */
+  color: #e5e5e5; /* light text */
+  font-family: "Arial", sans-serif;
   margin: 0;
   padding: 0;
+  height: 100%;
+  font-size: 1rem; /* scalable */
+  line-height: 1.6;
+}
+
+/* Page Wrapper */
+.page-wrapper {
+  background-color: #1e293b;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Main Content Container */
+.main-container {
+  max-width: 90%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: calc(100vh - 200px); /* leaves space for footer */
+  background-color: #1e293b;
+}
+
+.main-container.blog {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background: none;
+}
+
+/* Responsive - larger screens */
+@media (min-width: 1024px) {
+  .main-container {
+    max-width: 1400px;
+    padding: 2rem;
+  }
 }

@@ -19,7 +19,9 @@ public class ArticleEntity {
     private Integer titleId;
     private String slug;
     private String title;
+    private String tag;
     private String description;
+    private String imageUrl;
     private String authorName;
     private String createdAt;
     private String updatedAt;
@@ -35,6 +37,11 @@ public class ArticleEntity {
         return slug;
     }
 
+    @DynamoDbAttribute("tag")
+    public String getTag() {
+        return tag;
+    }
+
     @DynamoDbAttribute("title")
     public String getTitle() {
         return title;
@@ -43,6 +50,11 @@ public class ArticleEntity {
     @DynamoDbAttribute("description")
     public String getDescription() {
         return description;
+    }
+
+    @DynamoDbAttribute("imageUrl")
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     @DynamoDbAttribute("authorName")

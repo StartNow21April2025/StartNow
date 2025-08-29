@@ -18,11 +18,12 @@ public final class AgentUtil {
             return null;
         }
 
-        return Agent.builder().agentId(entity.getAgentId()).agentName(entity.getAgentName())
-                .agentTitle(entity.getAgentTitle()).tagLine(entity.getTagLine())
-                .description(entity.getDescription()).status(entity.getStatus())
-                .authorName(entity.getAuthorName()).createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt()).build();
+        return Agent.builder().agentId(entity.getAgentId()).name(entity.getName())
+                .title(entity.getTitle()).quote(entity.getQuote())
+                .description(entity.getDescription()).imageUrl(entity.getImageUrl())
+                .strengths(entity.getStrengths()).weaknesses(entity.getWeaknesses())
+                .status(entity.getStatus()).authorName(entity.getAuthorName())
+                .createdAt(entity.getCreatedAt()).updatedAt(entity.getUpdatedAt()).build();
     }
 
     public static AgentEntity convertToAgentEntity(Agent agent) {
@@ -30,11 +31,12 @@ public final class AgentUtil {
             return null;
         }
 
-        return AgentEntity.builder().agentId(agent.getAgentId()).agentName(agent.getAgentName())
-                .agentTitle(agent.getAgentTitle()).tagLine(agent.getTagLine())
-                .description(agent.getDescription()).status(agent.getStatus())
-                .authorName(agent.getAuthorName()).updatedAt(agent.getUpdatedAt())
-                .createdAt(agent.getCreatedAt()).build();
+        return AgentEntity.builder().agentId(agent.getAgentId()).name(agent.getName())
+                .title(agent.getTitle()).quote(agent.getQuote()).description(agent.getDescription())
+                .imageUrl(agent.getImageUrl()).strengths(agent.getStrengths())
+                .weaknesses(agent.getWeaknesses()).status(agent.getStatus())
+                .authorName(agent.getAuthorName()).createdAt(agent.getCreatedAt())
+                .updatedAt(agent.getUpdatedAt()).build();
     }
 
     public static void validateAgent(AgentEntity agent) {
@@ -44,7 +46,7 @@ public final class AgentUtil {
             throw new ValidationException("Agent cannot be null");
         }
 
-        if (agent.getAgentName() == null || agent.getAgentName().trim().isEmpty()) {
+        if (agent.getName() == null || agent.getName().trim().isEmpty()) {
             errors.add("Agent name is required");
         }
 

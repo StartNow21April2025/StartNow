@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,8 +28,9 @@ public class AgentService implements AgentServiceInterface {
             // If agentId is not set, you might want to generate one
             AgentEntity newAgent = AgentEntity.builder()
                     .agentId(agent.getAgentId() != null ? agent.getAgentId() : generateAgentId())
-                    .agentName(agent.getAgentName()).tagLine(agent.getTagLine())
-                    .agentTitle(agent.getAgentTitle()).description(agent.getDescription())
+                    .name(agent.getName()).quote(agent.getQuote()).title(agent.getTitle())
+                    .description(agent.getDescription()).imageUrl(agent.getImageUrl())
+                    .strengths(agent.getStrengths()).weaknesses(agent.getWeaknesses())
                     .status(agent.getStatus()).createdAt(LocalDateTime.now().toString())
                     .authorName(agent.getAuthorName()).updatedAt(LocalDateTime.now().toString())
                     .build(); // Add update timestamp
@@ -50,12 +52,11 @@ public class AgentService implements AgentServiceInterface {
 
             // Create updated entity preserving original creation time and id
             AgentEntity updatedAgentEntity = AgentEntity.builder().agentId(agentId)
-                    .agentName(updatedAgent.getAgentName()).agentTitle(updatedAgent.getAgentTitle())
-                    .tagLine(updatedAgent.getTagLine()).description(updatedAgent.getDescription())
-                    .status(updatedAgent.getStatus()).createdAt(existingAgent.getCreatedAt()) // Preserve
-                                                                                              // original
-                                                                                              // creation
-                                                                                              // time
+                    .name(updatedAgent.getName()).title(updatedAgent.getTitle())
+                    .quote(updatedAgent.getQuote()).description(updatedAgent.getDescription())
+                    .status(updatedAgent.getStatus()).createdAt(existingAgent.getCreatedAt())
+                    .imageUrl(updatedAgent.getImageUrl()).strengths(updatedAgent.getStrengths())
+                    .weaknesses(updatedAgent.getWeaknesses())
                     .updatedAt(LocalDateTime.now().toString())// Add update timestamp
                     .authorName(updatedAgent.getAuthorName()).build();
 
@@ -84,7 +85,9 @@ public class AgentService implements AgentServiceInterface {
     @Override
     public List<Agent> getAllAgents() {
         try {
-            return agentRepository.findAll().stream().map(AgentUtil::convertToAgent)
+            return agentRepository.findAll().stream()
+                    .sorted(Comparator.comparing(AgentEntity::getAgentId))
+                    .map(AgentUtil::convertToAgent)
                     .filter(agent -> agent != null && agent.getStatus().equals("active"))
                     .collect(Collectors.toList());
         } catch (Exception e) {

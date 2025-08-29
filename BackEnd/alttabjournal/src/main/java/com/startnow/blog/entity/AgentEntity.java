@@ -17,10 +17,13 @@ import java.time.LocalDateTime;
 @Data
 public class AgentEntity {
     private Integer agentId;
-    private String agentName;
-    private String agentTitle;
-    private String tagLine;
+    private String name;
+    private String title;
+    private String quote;
     private String description;
+    private String imageUrl;
+    private String strengths;
+    private String weaknesses;
     private String authorName;
     private String createdAt;
     private String updatedAt;
@@ -32,24 +35,39 @@ public class AgentEntity {
         return agentId;
     }
 
-    @DynamoDbAttribute("agentName")
-    public String getAgentName() {
-        return agentName;
+    @DynamoDbAttribute("name")
+    public String getName() {
+        return name;
     }
 
-    @DynamoDbAttribute("agentTitle")
-    public String getAgentTitle() {
-        return agentTitle;
+    @DynamoDbAttribute("title")
+    public String getTitle() {
+        return title;
     }
 
-    @DynamoDbAttribute("tagLine")
-    public String getTagLine() {
-        return tagLine;
+    @DynamoDbAttribute("quote")
+    public String getQuote() {
+        return quote;
     }
 
     @DynamoDbAttribute("description")
     public String getDescription() {
         return description;
+    }
+
+    @DynamoDbAttribute("imageUrl")
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    @DynamoDbAttribute("strengths")
+    public String getStrengths() {
+        return strengths;
+    }
+
+    @DynamoDbAttribute("weaknesses")
+    public String getWeaknesses() {
+        return weaknesses;
     }
 
     @DynamoDbAttribute("authorName")

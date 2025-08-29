@@ -3,15 +3,18 @@ package com.startnow.blog.repository;
 import com.startnow.blog.entity.ArticleEntity;
 import com.startnow.blog.exception.RepositoryException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchGetResultPage;
+import software.amazon.awssdk.enhanced.dynamodb.model.ReadBatch;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// Move table creation and operations to Repository
 @Repository
 @Slf4j
 public class ArticleRepository implements IArticleRepository {
@@ -20,6 +23,9 @@ public class ArticleRepository implements IArticleRepository {
     public ArticleRepository(DynamoDbTable<ArticleEntity> articleTable) {
         this.articleTable = articleTable;
     }
+
+    @Autowired
+    private DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
     /**
      * Save an article to the DynamoDB table.
@@ -91,4 +97,28 @@ public class ArticleRepository implements IArticleRepository {
             throw new RepositoryException("Failed to find all Articles", e);
         }
     }
+
+    /**
+     * Find articles of a few ids in the DynamoDB table.
+     *
+     * @return A list of article entities.
+     */
+    @Override
+    public List<ArticleEntity> findByIds(List<Integer> ids) {
+        try {
+            ReadBatch.Builder<ArticleEntity> readBatch =
+                    ReadBatch.builder(ArticleEntity.class).mappedTableResource(articleTable);
+
+            ids.forEach(id -> readBatch.addGetItem(Key.builder().partitionValue(id).build()));
+
+            BatchGetResultPage resultPage = dynamoDbEnhancedClient
+                    .batchGetItem(r -> r.addReadBatch(readBatch.build())).iterator().next();
+
+            return resultPage.resultsForTable(articleTable);
+        } catch (Exception e) {
+            log.error("Error finding multiple articles: {}", e.getMessage());
+            throw new RepositoryException("Failed to find multiple articles", e);
+        }
+    }
+
 }

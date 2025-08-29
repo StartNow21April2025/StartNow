@@ -47,7 +47,7 @@ class ArticleContentRepositoryTests {
         // Assert
         assertNotNull(savedArticleContent);
         assertEquals(slug, savedArticleContent.getSlug());
-        assertEquals(CONTENT, savedArticleContent.getFullContent());
+        assertEquals(CONTENT, savedArticleContent.getTitle());
         verify(articleContentTable).putItem(articleContent);
     }
 
@@ -76,7 +76,7 @@ class ArticleContentRepositoryTests {
         // Assert
         assertTrue(result.isPresent());
         assertEquals(slug, result.get().getSlug());
-        assertEquals(CONTENT, result.get().getFullContent());
+        assertEquals(CONTENT, result.get().getTitle());
     }
 
     @Test
@@ -128,8 +128,7 @@ class ArticleContentRepositoryTests {
     }
 
     private ArticleContentEntity createSampleArticleContent() {
-        return ArticleContentEntity.builder().slug(slug).fullContent(CONTENT)
-                .createdAt("2024-01-01").updatedAt("2024-01-01").build();
+        return ArticleContentEntity.builder().slug(slug).title(CONTENT).build();
     }
 }
 

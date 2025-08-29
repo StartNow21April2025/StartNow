@@ -15,4 +15,6 @@ public interface IArticleRepository extends BaseRepository<ArticleEntity, Intege
     public Optional<ArticleEntity> findById(Integer id);
 
     public List<ArticleEntity> findAll();
+
+    public List<ArticleEntity> findByIds(List<Integer> ids);
 }

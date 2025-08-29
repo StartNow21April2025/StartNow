@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Getter
 @Builder
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ArticleContent {
     public String slug;
-    public String fullContent;
-    public String authorName;
-    public String createdAt;
-    public String updatedAt;
+    public String author;
+    public String date;
+    public String title;
+    public ArrayList<ArticleSection> sections;
     private String status;
 }

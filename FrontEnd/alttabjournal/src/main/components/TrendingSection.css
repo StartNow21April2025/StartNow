@@ -1,0 +1,100 @@
+.trending-section {
+  padding: 2.5rem 1.5rem;
+  background-color: #1e293b;
+  color: #e5e5e5;
+}
+
+.trending-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.tag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.tag-button {
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  background-color: #374151;
+  color: #d1d5db;
+  transition: 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.tag-button:hover {
+  background-color: #4b5563;
+}
+
+.active-tag {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.trending-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .trending-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .trending-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.trending-card {
+  background-color: #0f172a;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  text-decoration: none;
+  color: white;
+  transition: box-shadow 0.3s;
+}
+
+.trending-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.trending-image {
+  width: 100%;
+  height: 10rem;
+  object-fit: cover;
+  object-position: center 30%;
+}
+
+.trending-content {
+  padding: 1rem;
+}
+
+.tag-label {
+  font-size: 0.75rem;
+  background-color: #2563eb;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.trending-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.trending-description {
+  font-size: 0.875rem;
+  color: #d1d5db;
+  margin-top: 0.5rem;
+}
