@@ -8,9 +8,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @Slf4j
@@ -46,6 +44,7 @@ public class SectionArticleMappingRepository implements ISectionArticleMappingRe
      * @param sectionId The ID of the section to find.
      * @return List containing the sectionArticleMapping entity
      */
+    @Override
     public List<SectionArticleMappingEntity> findBySectionId(String sectionId) {
         try {
             return sectionArticleMappingTable

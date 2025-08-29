@@ -37,8 +37,15 @@ public class SectionArticleMappingService implements SectionArticleMappingServic
         try {
             List<SectionArticleMappingEntity> sectionArticleMappingEntityList =
                     sectionArticleMappingRepository.findBySectionId(section);
-            List<Integer> idList = sectionArticleMappingEntityList.stream()
-                    .map(s -> Integer.valueOf(s.getArticleId())).collect(Collectors.toList());
+            List<Integer> idList = sectionArticleMappingEntityList.stream().map(s -> {
+                try {
+                    return Integer.valueOf(s.getArticleId());
+                } catch (NumberFormatException ex) {
+                    logger.warn("Invalid articleId '{}' for section '{}': not an integer",
+                            s.getArticleId(), section);
+                    return null; // skip this entry
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList());
             List<ArticleEntity> articleEntityList = articleRepository.findByIds(idList);
             if (articleEntityList.isEmpty()) {
                 logger.warn("Articles for section {} not found in the database.", section);
