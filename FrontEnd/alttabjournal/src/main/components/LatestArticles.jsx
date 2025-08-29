@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ArticleCard from "./ArticleCard";
+import { API_BASE_URL } from "../config/api.js";
 
 const LatestArticles = () => {
   const [articles, setArticles] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/articles")
+    fetch(`${API_BASE_URL}/api/articles`)
       .then((res) => res.json())
       .then((data) => setArticles(data))
       .catch((err) => console.error("Failed to fetch articles", err));

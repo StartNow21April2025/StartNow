@@ -1,79 +1,73 @@
 .java-blog-container {
   max-width: 800px;
-  margin: 0 auto;
+  margin: auto;
   padding: 24px;
-  font-family: Arial, sans-serif;
-  color: #e5e5e5;
-  background-color: #1e1e2f;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  line-height: 1.7;
+  background-color: #ffffff; /* white background */
+  color: #111111; /* black text */
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .blog-title {
-  font-size: 2rem;
+  font-size: 2.3rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  color: #000000; /* black */
 }
 
 .blog-meta {
   font-size: 0.9rem;
-  color: #aaa;
-  margin-bottom: 1.5rem;
+  color: #555555; /* medium gray */
+  margin-bottom: 25px;
 }
 
-/* Table of Contents */
-.blog-toc {
-  background-color: #2e2e3e;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  border-radius: 8px;
+.section-title {
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  color: #000000; /* black */
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 4px;
 }
 
-.toc-heading {
-  font-size: 1.1rem;
-  color: #ffd700;
-  margin-bottom: 0.5rem;
+.section-paragraph {
+  margin-bottom: 14px;
+  color: #222222;
 }
 
-.toc-list {
-  list-style-type: disc;
-  padding-left: 1.2rem;
+.section-list li {
+  margin-bottom: 7px;
+  color: #222222;
 }
 
-.toc-link {
-  color: #4fc3f7;
-  text-decoration: none;
+.section-quote {
+  border-left: 4px solid #000000;
+  padding-left: 14px;
+  font-style: italic;
+  color: #333333;
+  background: #f7f7f7;
+  margin: 14px 0;
+  border-radius: 4px;
 }
 
-.toc-link:hover {
-  text-decoration: underline;
+.section-code {
+  background: #f4f4f4;
+  color: #000000;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
 }
 
-/* Blog Sections */
-.blog-section {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #444;
+.section-list {
+  list-style-type: disc; /* classic solid bullets */
+  padding-left: 1.5rem; /* space so bullets don’t overlap text */
+  margin-bottom: 14px;
 }
 
-.section-toggle {
-  background: none;
-  border: none;
-  color: #facc15;
-  font-size: 1.1rem;
-  font-weight: bold;
-  text-align: left;
-  width: 100%;
-  cursor: pointer;
-  padding: 0;
-}
-
-.section-toggle:hover {
-  text-decoration: underline;
-}
-
-.section-content {
-  margin-top: 0.75rem;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #ddd;
-  white-space: pre-line;
+.section-list li {
+  margin-bottom: 7px;
+  color: #222222;
 }

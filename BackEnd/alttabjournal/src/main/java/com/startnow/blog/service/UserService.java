@@ -69,16 +69,16 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public User findByEmail(String email){
+    public User findByEmail(String email) {
         try {
             Optional<UserEntity> userEntity = userRepository.findByEmail(email);
-            if(userEntity.isEmpty()){
-                throw new ResourceNotFoundException(
-                        "User not found with LoginRequest: " + email);
+            if (userEntity.isEmpty()) {
+                throw new ResourceNotFoundException("User not found with LoginRequest: " + email);
             } else {
-                return User.builder().name(userEntity.get().getName()).email(userEntity.get().getEmail()).build();
+                return User.builder().name(userEntity.get().getName())
+                        .email(userEntity.get().getEmail()).build();
             }
-        } catch(ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new ServiceException("Failed to fetch User", e);

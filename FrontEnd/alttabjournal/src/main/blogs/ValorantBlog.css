@@ -1,0 +1,116 @@
+body {
+  font-family: "Arial", sans-serif;
+  color: #e0e0e0;
+  line-height: 1.8;
+  font-size: 1rem;
+  background-color: #121212;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Banner */
+.banner {
+  background: linear-gradient(45deg, #0f0f0f, #1a1a1a);
+  padding: 4rem 2rem;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(57, 255, 20, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes neonGlow {
+  0% {
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(57, 255, 20, 1);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.7);
+  }
+}
+
+.banner-subtitle {
+  font-size: 1.25rem;
+  color: #ddd;
+  text-shadow: 0 0 10px #666;
+}
+
+/* Blog Content */
+.blog-content {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  overflow-wrap: break-word;
+}
+
+/* Agent Cards */
+.agent {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  transition: 0.3s ease-in-out;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.agent:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.8);
+}
+
+.agent img {
+  width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  object-fit: contain;
+  transition: transform 0.3s ease-in-out;
+}
+
+.agent img:hover {
+  transform: scale(1.15);
+}
+
+/* Headings */
+h1,
+h2 {
+  color: #39ff14;
+}
+
+blockquote {
+  font-style: italic;
+  border-left: 4px solid #90ee90;
+  padding-left: 1rem;
+  color: #c0ffc0;
+}
+
+/* Final container */
+.val-blog-container {
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 2rem;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .banner {
+    padding: 2rem 1rem;
+  }
+  .glow-text {
+    font-size: 2.25rem;
+  }
+  .blog-content {
+    padding: 1rem;
+  }
+}

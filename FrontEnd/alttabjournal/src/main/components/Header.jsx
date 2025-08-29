@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SignInModal from "../pages/SignInModal";
 import RegisterModal from "../pages/RegisterModal";
 import "./Header.css"; //
+import { API_BASE_URL } from "../config/api.js";
 
 export default function Header({ onToggleSidebar }) {
   const [showTopics, setShowTopics] = useState(false);
@@ -12,7 +13,7 @@ export default function Header({ onToggleSidebar }) {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/auth/me", {
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
           credentials: "include", // send the cookie
         });
         if (res.ok) {
@@ -30,7 +31,7 @@ export default function Header({ onToggleSidebar }) {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:8080/api/auth/logout", {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

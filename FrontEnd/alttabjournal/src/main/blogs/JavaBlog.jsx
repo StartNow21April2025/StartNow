@@ -1,52 +1,76 @@
-import { useState } from "react";
-import "./JavaBlog.css"; // import your custom CSS file
+import React from "react";
+import "./JavaBlog.css";
 
-const JavaBlog = ({ blog }) => {
-  const [openSection, setOpenSection] = useState(null);
-
+const BlogPage = ({ blog }) => {
   return (
     <div className="java-blog-container">
+      {/* Title */}
       <h1 className="blog-title">{blog.title}</h1>
+
+      {/* Meta */}
       <p className="blog-meta">
-        By {blog.author} | {blog.date}
+        By {blog.author} • {blog.date}
       </p>
 
-      {/* Table of Contents */}
-      <div className="blog-toc">
-        <h2 className="toc-heading">📚 Table of Contents </h2>
-        <ul className="toc-list">
-          {blog.sections.map((section) => (
-            <li key={section.id}>
-              <a
-                href={`#${section.id}`}
-                onClick={() => setOpenSection(section.id)}
-                className="toc-link"
-              >
-                {section.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Sections */}
+      {blog.sections.map((section, sectionIndex) => (
+        <div key={section.id || sectionIndex} className="blog-section">
+          {/* Section Title */}
+          <h2 className="section-title">
+            {sectionIndex + 1}. {section.title}
+          </h2>
 
-      {/* Blog Sections */}
-      {blog.sections.map((section) => (
-        <div key={section.id} id={section.id} className="blog-section">
-          <button
-            className="section-toggle"
-            onClick={() =>
-              setOpenSection(openSection === section.id ? null : section.id)
+          {/* Section Content */}
+          {section.content.map((block, i) => {
+            switch (block.type) {
+              case "paragraph":
+                return block.text ? (
+                  <p key={i} className="section-paragraph">
+                    {block.text}
+                  </p>
+                ) : null;
+
+              case "list":
+                return block.items?.length > 0 ? (
+                  <ul key={i} className="section-list">
+                    {block.items.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null;
+
+              case "quote":
+                return block.text ? (
+                  <blockquote key={i} className="section-quote">
+                    {block.text}
+                  </blockquote>
+                ) : null;
+
+              case "code":
+                return block.text ? (
+                  <pre key={i} className="section-code">
+                    <code>{block.text}</code>
+                  </pre>
+                ) : null;
+
+              case "image":
+                return block.src ? (
+                  <div key={i} className="section-image">
+                    <img src={block.src} alt="" />
+                  </div>
+                ) : null;
+
+              case "divider":
+                return <hr key={i} className="section-divider" />;
+
+              default:
+                return null;
             }
-          >
-            {section.title}
-          </button>
-          {openSection === section.id && (
-            <p className="section-content">{section.content}</p>
-          )}
+          })}
         </div>
       ))}
     </div>
   );
 };
 
-export default JavaBlog;
+export default BlogPage;

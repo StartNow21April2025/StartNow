@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
@@ -14,5 +14,5 @@ import java.util.ArrayList;
 public class ArticleSection {
     public String id;
     public String title;
-    private String content;
+    private List<ArticleContentBlock> content;
 }

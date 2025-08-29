@@ -34,7 +34,8 @@ public class UserAuthController {
      *
      */
     @PostMapping("/auth/sign-in")
-    public ResponseEntity<?> signIn(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<?> signIn(@RequestBody LoginRequest loginRequest,
+            HttpServletResponse response) {
         User user = userService.signIn(loginRequest); // You validate username/password here
         String token = jwtUtil.generateToken(user.getEmail());
 
@@ -46,8 +47,8 @@ public class UserAuthController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(Map.of("message", "Login successful", "name",
-                user.getName(), "email", user.getEmail()));
+        return ResponseEntity.ok(Map.of("message", "Login successful", "name", user.getName(),
+                "email", user.getEmail()));
     }
 
 
@@ -57,7 +58,8 @@ public class UserAuthController {
      *
      */
     @PostMapping("/auth/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest, HttpServletResponse response) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest,
+            HttpServletResponse response) {
         User user = userService.register(registerRequest);
         String token = jwtUtil.generateToken(user.getEmail());
 
@@ -69,7 +71,8 @@ public class UserAuthController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(Map.of("message", "Registration successful", "name", user.getName(), "email", user.getEmail()));
+        return ResponseEntity.ok(Map.of("message", "Registration successful", "name",
+                user.getName(), "email", user.getEmail()));
     }
 
     @PostMapping("/auth/logout")
