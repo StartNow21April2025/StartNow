@@ -1,5 +1,6 @@
 /* eslint-env node */
 import "@testing-library/jest-dom";
+import "./src/test/setupTests.js";
 import { TextEncoder, TextDecoder } from "util";
 
 // Set up TextEncoder/TextDecoder
